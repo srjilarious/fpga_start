@@ -1,0 +1,12 @@
+*.asc
+*.bin
+*.dblite
+*.blif
+*.history
+trace.vcd
+conanbuildinfo*
+conaninfo.txt
+graph_info.json
+Vtop
+.vscode/
+obj_dir/
