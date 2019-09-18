@@ -8,5 +8,6 @@ conanbuildinfo*
 conaninfo.txt
 graph_info.json
 Vtop
+state_machine_1
 .vscode/
 obj_dir/

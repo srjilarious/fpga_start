@@ -3,9 +3,9 @@
 
 #include <memory>
 
-// 1048576 is the number of ticks until the 20th bit of num_counter will 
-// change.
-const int NumSimulationTicks = 1048576 + 100;
+// In simulation we have the states change every 64 ticks, so we have a 
+// relatively low number of overall ticks to see if our circuit is working.
+const int NumSimulationTicks = 600;
 
 int main(int argc, char **argv) 
 {
