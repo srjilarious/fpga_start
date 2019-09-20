@@ -34,6 +34,23 @@ module top (
     localparam A_STATE = 1;
     localparam B_STATE = 2;
 
+    // Handle counter and switching between state
+    always @(posedge CLK) begin
+        if(counter < NUM_CYCLES_PER_STATE) begin
+            counter <= counter + 1;
+        end
+        else begin
+            counter <= 0;
+
+            case (curr_state)
+                INIT_STATE, A_STATE: 
+                    curr_state <= curr_state + 1;
+
+                default: // B_STATE too
+                    curr_state <= INIT_STATE;
+            endcase
+        end
+    end
 
     // Determine LED behavior from the current state.
     always @(posedge CLK) begin
@@ -51,29 +68,4 @@ module top (
                 LED <= 0;
         endcase
     end
-
-    // Handle counter and switching between state
-    always @(posedge CLK) begin
-        if(counter >= NUM_CYCLES_PER_STATE) begin
-            counter <= 0;
-
-            case (curr_state)
-                INIT_STATE: 
-                    curr_state <= curr_state + 1;
-
-                A_STATE:
-                    curr_state <= curr_state + 1;
-                
-                B_STATE:
-                    curr_state <= INIT_STATE;
-
-                default:
-                    curr_state <= INIT_STATE;
-            endcase
-        end
-        else begin
-            counter <= counter + 1;
-        end
-    end
-
 endmodule
