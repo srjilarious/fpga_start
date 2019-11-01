@@ -11,8 +11,11 @@ ifeq ($(ENABLE_TRACE), 1)
 	CPP_TRACE=-DVERILATOR_TRACE
 endif
 
-state_machine_1:
+blinky:
 	$(VC) $(VERILATOR_TRACE) -DSIMULATION -Wall -y ../lib  -CFLAGS "--std=c++14 -I../support $(CPP_TRACE)" --cc $(VERILOG_CODE) --exe $(TEST_BENCH) && \
 	cd obj_dir && \
 	make -f ./Vtop.mk && \
 	cp ./Vtop ../$(TEST_NAME)
+
+# seven_seg: seven_seg_verilog
+# 	make -j -C obj_dir Vtop.mk -I/usr/share/verilator/include Vtop .

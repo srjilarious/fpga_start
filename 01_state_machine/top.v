@@ -34,7 +34,7 @@ module top (
     localparam A_STATE = 1;
     localparam B_STATE = 2;
 
-    // Handle counter and switching between state
+    // Handle counter and switching between states
     always @(posedge CLK) begin
         if(counter < NUM_CYCLES_PER_STATE) begin
             counter <= counter + 1;
