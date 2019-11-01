@@ -61,7 +61,7 @@ public:
         m_core->CLK = 0;
         m_core->eval();
 
-        if(m_trace) m_trace->dump(10*m_tickcount-2);
+        if(m_trace) m_trace->dump((vluint64_t)10*m_tickcount-2);
 
         // Toggle the clock
 
@@ -69,7 +69,7 @@ public:
         m_core->CLK = 1;
         m_core->eval();
 
-        if(m_trace) m_trace->dump(10*m_tickcount);
+        if(m_trace) m_trace->dump((vluint64_t)10*m_tickcount);
 
         // Falling edge
         m_core->CLK = 0;
@@ -79,7 +79,7 @@ public:
             // This portion, though, is a touch different.
             // After dumping our values as they exist on the
             // negative clock edge ...
-            m_trace->dump(10*m_tickcount+5);
+            m_trace->dump((vluint64_t)10*m_tickcount+5);
             //
             // We'll also need to make sure we flush any I/O to
             // the trace file, so that we can use the assert()
