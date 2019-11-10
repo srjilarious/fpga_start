@@ -27,16 +27,16 @@ int main(int argc, char **argv)
     auto renderWin = std::make_unique<sf::RenderWindow>(
                 sf::VideoMode(800, 600), "Seven Segment Display Simulation");
 
-	SevenSegDisplayTextures textures;
-	textures.horzOff.loadFromFile("assets/horz_segment_off.png");
-	textures.horzOn.loadFromFile("assets/horz_segment_on.png");
-	textures.vertOff.loadFromFile("assets/vert_segment_off.png");
-	textures.vertOn.loadFromFile("assets/vert_segment_on.png");
-	textures.decimalOff.loadFromFile("assets/dp_segment_off.png");
-	textures.decimalOn.loadFromFile("assets/dp_segment_on.png");
+    SevenSegDisplayTextures textures;
+    textures.horzOff.loadFromFile("assets/horz_segment_off.png");
+    textures.horzOn.loadFromFile("assets/horz_segment_on.png");
+    textures.vertOff.loadFromFile("assets/vert_segment_off.png");
+    textures.vertOn.loadFromFile("assets/vert_segment_on.png");
+    textures.decimalOff.loadFromFile("assets/dp_segment_off.png");
+    textures.decimalOn.loadFromFile("assets/dp_segment_on.png");
 
-	SevenSegDisplay seg(textures);
-	seg.position = sf::Vector2f(100.0f, 100.0f);
+    SevenSegDisplay seg(textures);
+    seg.position = sf::Vector2f(100.0f, 100.0f);
 
     float simAmount = 0.0f;
     // Start the game loop
@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         while(simAmount > 1.0f)
         {
             tb->tick();
-			console->info(".");
+            console->info(".");
 
             simAmount -= 1.0f;
         }
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         //sf::Color clearColor = sf::Color( 64, tb->m_core->LED ? 128 : 64, 64, 255);
 
         // Clear screen
-		renderWin->clear();// clearColor);
+        renderWin->clear();// clearColor);
 
         seg.setSegment(Segment::A, tb->m_core->PIN_1);
         seg.setSegment(Segment::B, tb->m_core->PIN_2);

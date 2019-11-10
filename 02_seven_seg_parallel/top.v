@@ -61,45 +61,4 @@ module top (
     assign _seg_unused = &{1'b0, seg_out[7]};
     assign PIN_8 = counter[LED_BLINK_BIT];
 
-    // // Determine LED behavior from the current state.
-    // always @(posedge CLK) begin
-    //     case (curr_state)
-    //         INIT_STATE: 
-    //             LED <= 1;
-            
-    //         A_STATE: 
-    //             LED <= counter[LED_BLINK_BIT];
-            
-    //         B_STATE: 
-    //             LED <= 0;
-            
-    //         default: 
-    //             LED <= 0;
-    //     endcase
-    // end
-
-    // // Handle counter and switching between state
-    // always @(posedge CLK) begin
-    //     if(counter >= NUM_CYCLES_PER_STATE) begin
-    //         counter <= 0;
-
-    //         case (curr_state)
-    //             INIT_STATE: 
-    //                 curr_state <= curr_state + 1;
-
-    //             A_STATE:
-    //                 curr_state <= curr_state + 1;
-                
-    //             B_STATE:
-    //                 curr_state <= INIT_STATE;
-
-    //             default:
-    //                 curr_state <= INIT_STATE;
-    //         endcase
-    //     end
-    //     else begin
-    //         counter <= counter + 1;
-    //     end
-    // end
-
 endmodule
