@@ -17,5 +17,3 @@ blinky:
 	make -f ./Vtop.mk && \
 	cp ./Vtop ../$(TEST_NAME)
 
-# seven_seg: seven_seg_verilog
-# 	make -j -C obj_dir Vtop.mk -I/usr/share/verilator/include Vtop .

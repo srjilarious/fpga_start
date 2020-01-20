@@ -11,3 +11,6 @@ Vtop
 state_machine_1
 .vscode/
 obj_dir/
+build/
+
+00_blinky/blinky
