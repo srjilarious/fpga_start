@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     tb->openTrace("trace.vcd");
 
     auto console = spdlog::stdout_color_mt("sim");
-    console->info("Seven Segment Parallel Simulation!");
+    console->info("Seven Segment Shift Register Simulation!");
 
     auto renderWin = std::make_unique<sf::RenderWindow>(
         sf::VideoMode(800, 600), "Seven Segment Display Simulation");
