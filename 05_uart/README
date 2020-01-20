@@ -1,0 +1,14 @@
+This example implements a simple UART transmitter.
+
+# Simulation 
+
+You can build the simulation with conan and cmake (for Visual Studio 2019 Community in this case) using the following steps:
+
+    mkdir build
+    cd build
+    conan install .. -g cmake_multi -s build_type=Release
+    conan install .. -g cmake_multi -s build_type=Debug
+    cmake -DVERILATOR_ROOT="D:\code\tools\verilator" -G "Visual Studio 16 2019" -A x64 ..
+
+where I have cross-compiled verilator_bin.exe and placed it in the source code folder D:\code\tools\verilator in my case
+
