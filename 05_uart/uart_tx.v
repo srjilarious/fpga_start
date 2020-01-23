@@ -13,6 +13,8 @@ module uart_tx
         , o_tx_data
         , o_tx_active
         , o_tx_done
+
+        , o_dbg_state
     );
 
     input i_uart_clk;
@@ -23,6 +25,8 @@ module uart_tx
     output reg o_tx_active;
     output reg o_tx_done;
 
+    output reg o_dbg_state;
+
     // We expect the clock signal to be the baudrate multiplied by this.
     //parameter BAUD_MULT = 139; // 16MHz / 139 ~= 115200, which is a standard baudrate.
 
@@ -31,10 +35,14 @@ module uart_tx
     localparam SEND_DATA = 2;
     localparam SEND_STOP = 3;
 
-    reg [1:0] curr_state;
-    reg [7:0] state_counter;
-    reg [7:0] tx_byte;
-    reg [3:0] tx_bit_cnt;
+    reg [1:0] curr_state = 0;
+    reg [31:0] state_counter = 0;
+    reg [7:0] tx_byte = 0;
+    reg [3:0] tx_bit_cnt = 0;
+
+    assign o_dbg_state = 
+    //i_data_valid;
+        curr_state == IDLE_STATE;
 
     always @(posedge i_uart_clk)
     begin
@@ -56,14 +64,14 @@ module uart_tx
             SEND_START:
             begin
                 // We use BAUD_RATE -1 so our signals are asserted correctly for BAUD_MULT cycles
-                if(state_counter == (BAUD_MULT-1)) 
+                if(state_counter >= (BAUD_MULT-1)) 
                 begin
                     curr_state <= SEND_DATA;
                     tx_bit_cnt <= 0;
                     state_counter <= 0;
                 end
                 else begin
-                    state_counter <= state_counter +1;
+                    state_counter <= state_counter + 1;
                 end
 
                 o_tx_data <= 0;
@@ -73,7 +81,7 @@ module uart_tx
 
             SEND_DATA:
             begin
-                if(state_counter == (BAUD_MULT-1)) 
+                if(state_counter >= (BAUD_MULT-1)) 
                 begin
                     if(tx_bit_cnt == 7) begin
                         curr_state <= SEND_STOP;
@@ -86,7 +94,7 @@ module uart_tx
                     state_counter <= 0;
                 end
                 else begin
-                    state_counter <= state_counter +1;
+                    state_counter <= state_counter + 1;
                 end
 
                 o_tx_data <= tx_byte[0];
@@ -96,13 +104,13 @@ module uart_tx
 
             SEND_STOP:
             begin
-                if(state_counter == (BAUD_MULT-1)) 
+                if(state_counter >= (BAUD_MULT-1)) 
                 begin
                     curr_state <= IDLE_STATE;
                     state_counter <= 0;
                 end
                 else begin
-                    state_counter <= state_counter +1;
+                    state_counter <= state_counter + 1;
                 end
                 o_tx_data <= 1;
                 o_tx_active <= 0;

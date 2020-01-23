@@ -32,20 +32,21 @@ module top (
     localparam COUNT_BIT = 24;
 
     // 16 MHz / 139 ~= 115200 baud
-    localparam BAUD_MULT = 139;
+    //localparam BAUD_MULT = 139;
+    localparam BAUD_MULT = 1666;
 `endif
 
     localparam WAIT_STATE = 0;
     localparam SEND_BYTE = 1;
     localparam PAUSE_STATE = 2;
 
-    reg [1:0] curr_state;
+    reg [1:0] curr_state = 0;
 
     // Provide some names for the constant values of our states.
     // wire [7:0] seg_out;
     wire _seg_unused;
 
-    reg [12:0][7:0] message = "Hello World!\n";
+    reg [103:0] message = "Hello World!\n";
     localparam MESSAGE_SIZE = 13;
 
     reg [3:0] msg_index = MESSAGE_SIZE-1;
@@ -56,24 +57,30 @@ module top (
 
     wire uart_tx_active; 
     wire uart_tx_done;
+    wire output_data;
 
-    assign curr_byte = message[msg_index];
+    assign curr_byte = message[msg_index*8 +: 8];
 
+    wire dbg_state;
     uart_tx #(.BAUD_MULT(BAUD_MULT)) uart_out(
           .i_uart_clk(CLK)
         , .i_byte_in(curr_byte)
         , .i_data_valid(uart_tx_data_valid)
 
-        , .o_tx_data(PIN_1)
+        , .o_tx_data(output_data)
         , .o_tx_active(uart_tx_active)
         , .o_tx_done(uart_tx_done)
+        , .o_dbg_state(dbg_state)
     );
 
-    assign LED = curr_state == WAIT_STATE;
-
+    assign LED = curr_state == PAUSE_STATE;
+    assign PIN_1 = output_data;
+    
     // increment the blink_counter every clock
     always @(posedge CLK) 
     begin
+        counter <= counter + 1;
+
         case (curr_state)
             WAIT_STATE:
             begin
@@ -115,11 +122,16 @@ module top (
 
             PAUSE_STATE:
             begin
-                counter <= counter + 1;
+                // counter <= counter + 1;
                 if(counter[COUNT_BIT] == 1'b1) 
                 begin
                     curr_state <= WAIT_STATE;
                 end
+            end
+
+            default:
+            begin
+                curr_state <= WAIT_STATE;
             end
         endcase
     end
