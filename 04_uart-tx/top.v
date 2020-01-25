@@ -61,7 +61,8 @@ module top (
 
     assign curr_byte = message[msg_index*8 +: 8];
 
-    wire dbg_state;
+    //wire dbg_state;
+    
     uart_tx #(.BAUD_MULT(BAUD_MULT)) uart_out(
           .i_uart_clk(CLK)
         , .i_byte_in(curr_byte)
@@ -70,7 +71,7 @@ module top (
         , .o_tx_data(output_data)
         , .o_tx_active(uart_tx_active)
         , .o_tx_done(uart_tx_done)
-        , .o_dbg_state(dbg_state)
+        //, .o_dbg_state(dbg_state)
     );
 
     assign LED = curr_state == PAUSE_STATE;

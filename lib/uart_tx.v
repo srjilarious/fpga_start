@@ -14,7 +14,7 @@ module uart_tx
         , o_tx_active
         , o_tx_done
 
-        , o_dbg_state
+        //, o_dbg_state
     );
 
     input i_uart_clk;
@@ -25,7 +25,7 @@ module uart_tx
     output reg o_tx_active;
     output reg o_tx_done;
 
-    output reg o_dbg_state;
+    //output reg o_dbg_state;
 
     // We expect the clock signal to be the baudrate multiplied by this.
     //parameter BAUD_MULT = 139; // 16MHz / 139 ~= 115200, which is a standard baudrate.
@@ -40,9 +40,9 @@ module uart_tx
     reg [7:0] tx_byte = 0;
     reg [3:0] tx_bit_cnt = 0;
 
-    assign o_dbg_state = 
-    //i_data_valid;
-        curr_state == IDLE_STATE;
+    // assign o_dbg_state = 
+    // //i_data_valid;
+    //     curr_state == IDLE_STATE;
 
     always @(posedge i_uart_clk)
     begin
