@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(uart VERSION 1.0.0 LANGUAGES CXX)
+project(uart_rx VERSION 1.0.0 LANGUAGES CXX)
 
 #Find verilator
 find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
@@ -18,17 +18,17 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 set ( 
-        SRC_FILES 
-        main.cpp
+        RX_UNIT_TEST_SRC_FILES 
+        rx_unit_test_main.cpp
     )
 
 add_executable (
-        uart
-        ${SRC_FILES}
+        uart_rx_unit_test
+        ${RX_UNIT_TEST_SRC_FILES}
     )
 
 foreach(_LIB ${CONAN_LIBS})
-    target_link_libraries(uart PRIVATE ${_LIB})
+    target_link_libraries(uart_rx_unit_test PRIVATE ${_LIB})
 endforeach()
 
 # foreach(_LIB ${CONAN_LIBS_RELEASE})
@@ -39,13 +39,13 @@ endforeach()
 #     target_link_libraries(uart PRIVATE debug ${_LIB})
 # endforeach()
 
-target_include_directories(uart PRIVATE "../support")
+target_include_directories(uart_rx_unit_test PRIVATE "../support")
 
 # Add the Verilated circuit to the target
 verilate (
-        uart TRACE
+        uart_rx_unit_test TRACE
         INCLUDE_DIRS "." "../lib"
-        SOURCES ./top.v
+        SOURCES ./rx_unit_test.v
         VERILATOR_ARGS "-DSIMULATION" "-Wall"
     )
     
@@ -57,12 +57,12 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set_target_properties (
-        uart PROPERTIES 
+        uart_rx_unit_test PROPERTIES 
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
 
-add_custom_command (
-        TARGET uart POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/../assets ${CMAKE_BINARY_DIR}/bin/assets
-    )
+# add_custom_command (
+#         TARGET uart_rx_unit_test POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy_directory
+#         ${CMAKE_CURRENT_SOURCE_DIR}/../assets ${CMAKE_BINARY_DIR}/bin/assets
+#     )

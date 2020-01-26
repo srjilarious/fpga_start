@@ -23,15 +23,15 @@ module uart_rx
 
     input i_uart_clk;
 
-    output reg i_rx_data;
-    output reg i_rx_ready;
+    input i_rx_data;
+    input i_rx_ready;
 
-    input [7:0] o_byte_out;
+    output reg [7:0] o_byte_out;
     output reg o_rx_active;
-    input o_data_valid;
+    output reg o_data_valid;
 
     output reg o_dbg_state;
-    output wire o_current_rx_byte;
+    output wire [7:0] o_current_rx_byte;
 
     // We expect the clock signal to be the baudrate multiplied by this.
     //parameter BAUD_MULT = 139; // 16MHz / 139 ~= 115200, which is a standard baudrate.
@@ -40,8 +40,8 @@ module uart_rx
     localparam READ_START = 1;
     localparam READ_DATA = 2;
     localparam READ_STOP = 3;
-    localparam WAIT_USER_READY_LOW = 4;
-    localparam WAIT_USER_READY_HIGH = 5;
+    localparam WAIT_USER_READY_HIGH = 4;
+    localparam WAIT_USER_READY_LOW = 5;
 
     // We check in the middle of the bit for the value.
     localparam BIT_CHECK_CYCLE = BAUD_MULT >> 1;
@@ -67,9 +67,9 @@ module uart_rx
             // a byte starting with the start bit.
             IDLE_STATE:
             begin
-                if(i_rx_data) begin
+                if(!i_rx_data) begin
                     rx_byte <= 0;
-                    curr_state <= SEND_START;
+                    curr_state <= READ_START;
                 end
 
                 // Hold high until sending data.
@@ -84,11 +84,11 @@ module uart_rx
                 // We use BAUD_RATE - 1 so our signals are asserted correctly for BAUD_MULT cycles
                 if(state_counter == (BAUD_MULT-1)) 
                 begin
-                    curr_state <= SEND_DATA;
+                    curr_state <= READ_DATA;
                     rx_bit_cnt <= 0;
                     state_counter <= 0;
                 end
-                if(state_counter == BIT_CHECK_CYCLE && i_rx_data != 1'b0) 
+                else if(state_counter == BIT_CHECK_CYCLE && i_rx_data != 1'b0) 
                 begin
                     // We expext a 0 during the entire start bit.  If we
                     // Don't see a 0 still at our checkpoint, something went 
@@ -111,19 +111,22 @@ module uart_rx
                     // If we are on the last bit, expect the stop
                     // bit next, otherwise stay in this state
                     // and reset our counter.
-                    if(rx_bit_cnt == 7) begin
+                    if(rx_bit_cnt == 8) begin
                         curr_state <= READ_STOP;
                     end
 
                     state_counter <= 0;
                 end
-                if(state_counter == BIT_CHECK_CYCLE) 
-                begin
+                else
+                begin 
                     // We read the current bit in the middle of the cycle.
-                    rx_bit_cnt <= rx_bit_cnt + 1;
-                    rx_byte <= {i_rx_data, (rx_byte)[7:1]};
-                end
-                else begin
+                    if(state_counter == BIT_CHECK_CYCLE) 
+                    begin
+                        rx_bit_cnt <= rx_bit_cnt + 1;
+                        rx_byte <= {i_rx_data, rx_byte[7:1]};
+                        state_counter <= 0;
+                    end
+
                     state_counter <= state_counter + 1;
                 end
 
@@ -171,19 +174,19 @@ module uart_rx
             WAIT_USER_READY_LOW:
             begin
                 if(!i_rx_ready) begin
-                    curr_state <= IDLE;
+                    curr_state <= IDLE_STATE;
                 end
 
                 o_rx_active <= 0;
-                o_byte_out <= rx_byte;
-                o_data_valid <= 1;
+                o_byte_out <= 0;
+                o_data_valid <= 0;
             end
 
             default:
             begin
                 o_rx_active <= 0;
                 o_byte_out <= 0;
-                o_rx_data_valid <= 0;
+                o_data_valid <= 0;
                 curr_state <= IDLE_STATE;
                 state_counter <= 0;
             end
