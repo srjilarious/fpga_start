@@ -18,18 +18,16 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 set ( 
-        RX_UNIT_TEST_SRC_FILES 
-        rx_unit_test_main.cpp
+        SRC_FILES 
+        loopback_main.cpp
     )
 
 add_executable (
-        uart_rx_unit_test
-        ${RX_UNIT_TEST_SRC_FILES}
+        uart_loopback
+        ${SRC_FILES}
     )
 
-foreach(_LIB ${CONAN_LIBS})
-    target_link_libraries(uart_rx_unit_test PRIVATE ${_LIB})
-endforeach()
+target_link_libraries(uart_loopback PRIVATE ${CONAN_LIBS})
 
 # foreach(_LIB ${CONAN_LIBS_RELEASE})
 #     target_link_libraries(uart PRIVATE optimized ${_LIB})
@@ -39,13 +37,13 @@ endforeach()
 #     target_link_libraries(uart PRIVATE debug ${_LIB})
 # endforeach()
 
-target_include_directories(uart_rx_unit_test PRIVATE "../support")
+target_include_directories(uart_loopback PRIVATE "../support")
 
 # Add the Verilated circuit to the target
 verilate (
-        uart_rx_unit_test TRACE
+        uart_loopback TRACE
         INCLUDE_DIRS "." "../lib"
-        SOURCES ./rx_unit_test.v
+        SOURCES ./loopback.v
         VERILATOR_ARGS "-DSIMULATION" "-Wall"
     )
     
@@ -57,12 +55,6 @@ endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set_target_properties (
-        uart_rx_unit_test PROPERTIES 
+        uart_loopback PROPERTIES 
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
-
-# add_custom_command (
-#         TARGET uart_rx_unit_test POST_BUILD
-#         COMMAND ${CMAKE_COMMAND} -E copy_directory
-#         ${CMAKE_CURRENT_SOURCE_DIR}/../assets ${CMAKE_BINARY_DIR}/bin/assets
-#     )

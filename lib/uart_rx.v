@@ -18,7 +18,7 @@ module uart_rx
 `ifdef SIMULATION
         , o_current_rx_byte
 `endif
-        , o_dbg_state
+        //, o_dbg_state
     );
 
     input i_uart_clk;
@@ -30,8 +30,10 @@ module uart_rx
     output reg o_rx_active;
     output reg o_data_valid;
 
-    output reg o_dbg_state;
+    //output reg o_dbg_state;
+`ifdef SIMULATION
     output wire [7:0] o_current_rx_byte;
+`endif
 
     // We expect the clock signal to be the baudrate multiplied by this.
     //parameter BAUD_MULT = 139; // 16MHz / 139 ~= 115200, which is a standard baudrate.
@@ -51,9 +53,7 @@ module uart_rx
     reg [7:0] rx_byte = 0;
     reg [3:0] rx_bit_cnt = 0;
 
-    assign o_dbg_state = 
-    //i_data_valid;
-        curr_state == IDLE_STATE;
+    //assign o_dbg_state = curr_state == IDLE_STATE;
 
 `ifdef SIMULATION
     // During simulation, we can test the current contents of the rx byte

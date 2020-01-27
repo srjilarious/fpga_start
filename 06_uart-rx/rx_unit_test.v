@@ -55,9 +55,9 @@ module rx_unit_test (
 
     /* verilator lint_off UNUSED */
     wire uart_rx_active; 
-    wire dbg_state;
+    //wire dbg_state;
     /* verilator lint_on UNUSED */
-    
+
     reg ready_for_byte;
 
     assign LED = curr_byte == "A";
@@ -71,7 +71,7 @@ module rx_unit_test (
         , .o_byte_out(uart_byte_out)
         , .o_data_valid(uart_rx_data_valid)
 
-        , .o_dbg_state(dbg_state)
+        //, .o_dbg_state(dbg_state)
 
         `ifdef SIMULATION
         , .o_current_rx_byte(o_current_rx_byte)
