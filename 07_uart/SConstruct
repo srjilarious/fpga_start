@@ -15,6 +15,9 @@ from SCons.Script import (Builder, DefaultEnvironment, Default, AlwaysBuild,
                           GetOption, Exit, COMMAND_LINE_TARGETS, ARGUMENTS,
                           Variables, Help, Glob)
 
+# Project file list
+PROJECT_FILES = ['loopback.v', '../lib/uart_tx.v', '../lib/uart_rx.v']
+
 # -- Load arguments
 PROG = ARGUMENTS.get('prog', '')
 FPGA_SIZE = ARGUMENTS.get('fpga_size', '')
@@ -168,8 +171,14 @@ except IndexError:
 # print('PCF Found: {}'.format(PCF))
 
 # -- Define the Sintesizing Builder
+actionStr = "verilog_defaults -add -I ../lib; "
+for f in PROJECT_FILES:
+    actionStr += "read_verilog {}; ".format(f)
+
+actionStr += "synth_ice40 -blif $TARGET"
 synth = Builder(
-    action='yosys -p \"synth_ice40 -blif $TARGET\" {} $SOURCES'.format(
+    action='yosys -p \"{}\" {}'.format(
+        actionStr,
         '' if VERBOSE_ALL or VERBOSE_YOSYS else '-q'
     ),
     suffix='.blif',
