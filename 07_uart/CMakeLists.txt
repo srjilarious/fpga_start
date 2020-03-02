@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(uart_rx VERSION 1.0.0 LANGUAGES CXX)
 
+include(../cmake/yosys_ice40.cmake)
+
 #Find verilator
 find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
 if (NOT verilator_FOUND)
@@ -59,36 +61,17 @@ set_target_properties (
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
 
-
 # Custom target to run yosys synthesis steps
 add_custom_target(uart_loopback_synth)
 
-set(YOYSYS_DIR /mnt/d/code/tools/yosys/bin)
-set(ICE40_DIR /mnt/d/code/tools/ice40/bin)
-message("CMAKE BINARY DIR: ${CMAKE_BINARY_DIR}")
-
-set(YOSYS_ARGS -p "verilog_defaults -add -I ${CMAKE_BINARY_DIR}/../../lib\; read_verilog ${CMAKE_BINARY_DIR}/../../lib/uart_tx.v\; read_verilog ${CMAKE_BINARY_DIR}/../../lib/uart_rx.v\; synth_ice40 -top loopback -json hardware.json" -q ${CMAKE_BINARY_DIR}/../loopback.v)
-message("HAVE ARGS ${YOSYS_ARGS}")
-
-add_custom_command(
-  TARGET uart_loopback_synth
-  COMMAND yosys ARGS ${YOSYS_ARGS}
-  VERBATIM
+ice40_synthesis(
+  TARGET uart_loopback_synth 
+  TOP_LEVEL_VERILOG loopback.v 
+  SUPPORT_VERILOG 
+    ../lib/uart_tx.v
+    ../lib/uart_rx.v
   )
 
-set(NEXTPNR_ARGS --lp8k --package cm81 --json hardware.json --pcf ${CMAKE_BINARY_DIR}/../pins.pcf --asc hardware.asc -q)
-add_custom_command(
-  TARGET uart_loopback_synth
-  DEPENDS hardware.json
-  COMMAND nextpnr-ice40 ARGS ${NEXTPNR_ARGS}
-  VERBATIM
-  )
 
-set(ICEPACK_ARGS hardware.asc loopback.bin)
-add_custom_command(
-  TARGET uart_loopback_synth
-  DEPENDS hardware.asc
-  COMMAND icepack ARGS ${ICEPACK_ARGS}
-  VERBATIM
-  )
+
 
