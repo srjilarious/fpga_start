@@ -1,64 +1,30 @@
-cmake_minimum_required(VERSION 3.11)
-project(seven_sef_shit_reg VERSION 1.0.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.10)
+project(seven_seg_shift_reg VERSION 1.0.0 LANGUAGES CXX)
 
-#Find verilator
-find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
-if (NOT verilator_FOUND)
-  message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
-endif()
+# Include our cmake script that defines an fpga_project macro
+include(../cmake/fpga_project.cmake)
 
-# Use C++ 17 standard.
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(SIM_SRC_FILES 
+    main.cpp
+    ../support/SevenSegDisplay.cpp
+ )
 
-# Add all of our conan packages to our build.
-include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake)
-conan_basic_setup()
+set(SUPPORTING_VERILOG_FILES 
+    ../lib/hex_to_7seg.v
+    ../lib/shift_reg_output.v
+ )
 
-set ( 
-        SRC_FILES 
-        main.cpp
-        ../support/SevenSegDisplay.cpp
-    )
-
-add_executable (
-        seven_sef_shit_reg 
-        ${SRC_FILES}
-    )
-
-foreach(_LIB ${CONAN_LIBS_RELEASE})
-    target_link_libraries(seven_sef_shit_reg PRIVATE optimized ${_LIB})
-endforeach()
-    
-foreach(_LIB ${CONAN_LIBS_DEBUG})
-    target_link_libraries(seven_sef_shit_reg PRIVATE debug ${_LIB})
-endforeach()
-
-target_include_directories(seven_sef_shit_reg PRIVATE "../support")
-
-# Add the Verilated circuit to the target
-verilate (
-        seven_sef_shit_reg TRACE
-        INCLUDE_DIRS "." "../lib"
-        SOURCES ./top.v
-        VERILATOR_ARGS "-DSIMULATION" "-Wall"
-    )
-    
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  # using Visual Studio C++
-  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-set_target_properties (
-        seven_sef_shit_reg PROPERTIES 
-        VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    )
+ # Call our project macro to setup simulation and synthesis projects
+fpga_project(
+    TARGET seven_seg_shift_reg
+    SYNTH_BY_DEFAULT
+    SIM_SRC_FILES ${SIM_SRC_FILES}
+    TOP_LEVEL_VERILOG top.v
+    SUPPORT_VERILOG ${SUPPORTING_VERILOG_FILES}
+  )
 
 add_custom_command (
-        TARGET seven_sef_shit_reg POST_BUILD
+        TARGET seven_seg_shift_reg POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/../assets ${CMAKE_BINARY_DIR}/bin/assets
     )

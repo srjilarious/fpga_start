@@ -211,7 +211,7 @@ int main(int argc, char **argv)
     Verilated::commandArgs(argc, argv);
     auto tb = std::make_unique<TestBench<Vloopback>>();
 
-    tb->openTrace("trace.vcd");
+    //tb->openTrace("trace.vcd");
 
     auto console = spdlog::stdout_color_mt("simulation");
     console->info("UART Loopback simulation!");

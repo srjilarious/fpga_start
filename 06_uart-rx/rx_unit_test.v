@@ -51,7 +51,7 @@ module rx_unit_test (
     reg [7:0] curr_byte;
     wire [7:0] uart_byte_out;
 
-    reg uart_rx_data_valid = 0;
+    reg uart_rx_data_valid;// = 0;
 
     /* verilator lint_off UNUSED */
     wire uart_rx_active; 

@@ -34,6 +34,8 @@ module top (
     localparam A_STATE = 1;
     localparam B_STATE = 2;
 
+    reg LedValue = 0;
+
     // Handle counter and switching between states
     always @(posedge CLK) begin
         if(counter < NUM_CYCLES_PER_STATE) begin
@@ -56,16 +58,18 @@ module top (
     always @(posedge CLK) begin
         case (curr_state)
             INIT_STATE: 
-                LED <= 0;
+                LedValue <= 0;
             
             A_STATE: 
-                LED <= counter[LED_BLINK_BIT];
+                LedValue <= counter[LED_BLINK_BIT];
             
             B_STATE: 
-                LED <= 1;
+                LedValue <= 1;
             
             default: 
-                LED <= 0;
+                LedValue <= 0;
         endcase
     end
+
+    assign LED = LedValue;
 endmodule

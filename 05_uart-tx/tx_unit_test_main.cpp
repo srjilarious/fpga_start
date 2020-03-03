@@ -1,5 +1,5 @@
 #include "../support/TestBench.h"
-#include "Vtop.h"
+#include "Vtx_unit_test.h"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -22,7 +22,7 @@ unsigned char currByte = 0;
 int main(int argc, char **argv) 
 {
     Verilated::commandArgs(argc, argv);
-    auto tb = std::make_unique<TestBench<Vtop>>();
+    auto tb = std::make_unique<TestBench<Vtx_unit_test>>();
 
     const int NumTicksPerState = 3;//tb->m_core->CONFIG_BAUD_TICK;
     const int TickToSample = (NumTicksPerState+1)/2;

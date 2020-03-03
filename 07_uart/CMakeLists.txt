@@ -1,77 +1,23 @@
 cmake_minimum_required(VERSION 3.10)
-project(uart_rx VERSION 1.0.0 LANGUAGES CXX)
+project(uart_loopback VERSION 1.0.0 LANGUAGES CXX)
 
-include(../cmake/yosys_ice40.cmake)
+# Include our cmake script that defines an fpga_project macro
+include(../cmake/fpga_project.cmake)
 
-#Find verilator
-find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
-if (NOT verilator_FOUND)
-  message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
-endif()
+set(SIM_SRC_FILES 
+    loopback_main.cpp
+ )
 
-# Use C++ 17 standard.
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# Add all of our conan packages to our build.
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-#include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake)
-conan_basic_setup()
-
-set ( 
-        SRC_FILES 
-        loopback_main.cpp
-    )
-
-add_executable (
-        uart_loopback
-        ${SRC_FILES}
-    )
-
-target_link_libraries(uart_loopback PRIVATE ${CONAN_LIBS})
-
-# foreach(_LIB ${CONAN_LIBS_RELEASE})
-#     target_link_libraries(uart PRIVATE optimized ${_LIB})
-# endforeach()
-    
-# foreach(_LIB ${CONAN_LIBS_DEBUG})
-#     target_link_libraries(uart PRIVATE debug ${_LIB})
-# endforeach()
-
-target_include_directories(uart_loopback PRIVATE "../support")
-
-# Add the Verilated circuit to the target
-verilate (
-        uart_loopback TRACE
-        INCLUDE_DIRS "." "../lib"
-        SOURCES ./loopback.v
-        VERILATOR_ARGS "-DSIMULATION" "-Wall"
-    )
-    
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  # using Visual Studio C++
-  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-set_target_properties (
-        uart_loopback PROPERTIES 
-        VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    )
-
-# Custom target to run yosys synthesis steps
-add_custom_target(uart_loopback_synth)
-
-ice40_synthesis(
-  TARGET uart_loopback_synth 
-  TOP_LEVEL_VERILOG loopback.v 
-  SUPPORT_VERILOG 
+set(SUPPORTING_VERILOG_FILES 
     ../lib/uart_tx.v
     ../lib/uart_rx.v
+ )
+
+ # Call our project macro to setup simulation and synthesis projects
+fpga_project(
+    TARGET uart_loopback
+    SYNTH_BY_DEFAULT
+    SIM_SRC_FILES ${SIM_SRC_FILES}
+    TOP_LEVEL_VERILOG loopback.v
+    SUPPORT_VERILOG ${SUPPORTING_VERILOG_FILES}
   )
-
-
-
-

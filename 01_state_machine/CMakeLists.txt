@@ -1,37 +1,23 @@
-cmake_minimum_required(VERSION 3.11)
-project(state_machine VERSION 1.0.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.10)
+project(seven_seg_parallel VERSION 1.0.0 LANGUAGES CXX)
 
-#Find verilator
-find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
-if (NOT verilator_FOUND)
-  message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
-endif()
+# Include our cmake script that defines an fpga_project macro
+include(../cmake/fpga_project.cmake)
 
-# Use C++ 17 standard.
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-set(SRC_FILES 
+set(SIM_SRC_FILES 
     main.cpp
+ )
+
+ # Call our project macro to setup simulation and synthesis projects
+fpga_project(
+    TARGET state_machine
+    SYNTH_BY_DEFAULT
+    SIM_SRC_FILES ${SIM_SRC_FILES}
+    TOP_LEVEL_VERILOG top.v
+  )
+
+add_custom_command (
+        TARGET state_machine POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/../assets ${CMAKE_BINARY_DIR}/bin/assets
     )
-
-add_executable(
-    state_machine 
-    ${SRC_FILES}
-    )
-
-# Add the Verilated circuit to the target
-verilate(state_machine TRACE
-    INCLUDE_DIRS "." "../lib"
-    SOURCES ./top.v)
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  # using Visual Studio C++
-  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-set_target_properties(state_machine PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-

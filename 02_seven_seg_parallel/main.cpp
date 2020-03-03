@@ -1,5 +1,5 @@
 #include "../support/TestBench.h"
-#include "obj_dir/Vtop.h"
+#include "Vtop.h"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 
     tb->openTrace("trace.vcd");
 
-    auto console = spdlog::stdout_color_mt("game");
+    auto console = spdlog::stdout_color_mt("simulation");
     console->info("Seven Segment Parallel Simulation!");
 
     auto renderWin = std::make_unique<sf::RenderWindow>(
