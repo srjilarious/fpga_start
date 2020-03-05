@@ -6,6 +6,7 @@
 
 #include <type_traits>
 #include <cstdint>
+#include <climits>
 
 template<typename Storage>
 class SerInParOutShiftReg

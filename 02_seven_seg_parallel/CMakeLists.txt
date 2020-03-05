@@ -1,61 +1,26 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.10)
 project(seven_seg_parallel VERSION 1.0.0 LANGUAGES CXX)
 
-#Find verilator
-find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${VERILATOR_ROOT})
-if (NOT verilator_FOUND)
-  message(FATAL_ERROR "Verilator was not found. Either install it, or set the VERILATOR_ROOT environment variable")
-endif()
+# Include our cmake script that defines an fpga_project macro
+include(../cmake/fpga_project.cmake)
 
-# Use C++ 17 standard.
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(SIM_SRC_FILES 
+    main.cpp
+    ../support/SevenSegDisplay.cpp
+ )
 
-# Add all of our conan packages to our build.
-include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake)
-conan_basic_setup()
+set(SUPPORTING_VERILOG_FILES 
+    ../lib/hex_to_7seg.v
+ )
 
-set ( 
-        SRC_FILES 
-        main.cpp
-        ../support/SevenSegDisplay.cpp
-    )
-
-add_executable (
-        seven_seg_parallel 
-        ${SRC_FILES}
-    )
-
-foreach(_LIB ${CONAN_LIBS_RELEASE})
-    target_link_libraries(seven_seg_parallel PRIVATE optimized ${_LIB})
-endforeach()
-    
-foreach(_LIB ${CONAN_LIBS_DEBUG})
-    target_link_libraries(seven_seg_parallel PRIVATE debug ${_LIB})
-endforeach()
-
-target_include_directories(seven_seg_parallel PRIVATE "../support")
-
-# Add the Verilated circuit to the target
-verilate (
-        seven_seg_parallel TRACE
-        INCLUDE_DIRS "." "../lib"
-        SOURCES ./top.v
-        VERILATOR_ARGS "-DSIMULATION" "-Wall"
-    )
-    
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  # using Visual Studio C++
-  add_definitions(/D_CRT_SECURE_NO_WARNINGS)
-endif()
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-set_target_properties (
-        seven_seg_parallel PROPERTIES 
-        VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    )
+ # Call our project macro to setup simulation and synthesis projects
+fpga_project(
+    TARGET seven_seg_parallel
+    SYNTH_BY_DEFAULT
+    SIM_SRC_FILES ${SIM_SRC_FILES}
+    TOP_LEVEL_VERILOG top.v
+    SUPPORT_VERILOG ${SUPPORTING_VERILOG_FILES}
+  )
 
 add_custom_command (
         TARGET seven_seg_parallel POST_BUILD

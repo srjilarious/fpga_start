@@ -1,5 +1,5 @@
 #include "../support/TestBench.h"
-#include "obj_dir/Vtop.h"
+#include "Vtop.h"
 
 #include <memory>
 
