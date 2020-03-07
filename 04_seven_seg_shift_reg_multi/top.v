@@ -7,8 +7,8 @@ module top (
     , output PIN_2  // shift register Data clock
     , output PIN_3  // shift register latch to outputs.
 `ifdef SIMULATION
-    , output [3:0] o_num
-    , output [7:0] o_seg_out // Debug output for simulator to veify shifted data is correct.
+    //, output [3:0] o_num
+    , output [15:0] o_seg_out // Debug output for simulator to veify shifted data is correct.
 `endif
 );
     // drive USB pull-up resistor to '0' to disable USB
@@ -21,8 +21,11 @@ module top (
     // When running the simulation, we will lower the number of cycles to make 
     // it easier to read the waveform output.
     localparam NUM_CYCLES_PER_UPDATE = 1 << 8;
-    localparam HIGH_BIT = 8;
-    localparam LOW_BIT = 5;
+    localparam START_SEG_1_BIT = 6;
+    localparam TOP_SEG_1_BIT = START_SEG_1_BIT + 3;
+    localparam START_SEG_2_BIT = TOP_SEG_1_BIT + 1;
+    localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
+
     localparam LED_BLINK_BIT = 2;
 `else
     // On the real board, our clock is 16MHz, so in order to see the LED pattern
@@ -31,8 +34,10 @@ module top (
     // We'll use that as our algorithm's tick delay.
     localparam NUM_CYCLES_PER_UPDATE = 1 << 24;
 
-    localparam HIGH_BIT = 27;
-    localparam LOW_BIT = 24;
+    localparam START_SEG_1_BIT = 24;
+    localparam TOP_SEG_1_BIT = START_SEG_1_BIT + 3;
+    localparam START_SEG_2_BIT = TOP_SEG_1_BIT + 1;
+    localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
 
     // We want the blink pattern to be 4 times per update tick, aka 2 bits less.
     localparam LED_BLINK_BIT = 22;
@@ -41,16 +46,20 @@ module top (
     // We'll use four update ticks per state.
     localparam NUM_CYCLES_PER_STATE = 4*NUM_CYCLES_PER_UPDATE;
     
-    wire [7:0] seg_out;
+    wire [15:0] seg_out;
     wire sh_ds, sh_clk, sh_latch;
 
-    hex_to_7seg segDisplay(counter[HIGH_BIT:LOW_BIT], seg_out);
+    hex_to_7seg segDisplay(counter[TOP_SEG_1_BIT:START_SEG_1_BIT], seg_out[7:0]);
+    hex_to_7seg segDisplay2(counter[TOP_SEG_2_BIT:START_SEG_2_BIT], seg_out[15:8]);
 
-    shift_reg_output shiftReg(
+    // Create a 16 bit (2^4) shift register.
+    shift_reg_output #(
+        .DATA_WIDTH(4)
+        ) shiftReg (
             CLK, 
             1'b0,
             seg_out,
-            counter[LOW_BIT],
+            counter[START_SEG_1_BIT],
             sh_ds,
             sh_clk,
             sh_latch
@@ -70,7 +79,7 @@ module top (
 
     `ifdef SIMULATION
         assign o_seg_out = seg_out;
-        assign o_num = counter[HIGH_BIT:LOW_BIT];
+        //assign o_num = counter[TOP_SEG_2_BIT:START_SEG_1_BIT];
     `endif
 
 endmodule

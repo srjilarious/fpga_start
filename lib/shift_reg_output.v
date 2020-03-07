@@ -18,7 +18,10 @@ module shift_reg_output
         //, o_curr_state
     );
 
-    input [7:0] i_value;
+    parameter DATA_WIDTH = 3;
+    parameter DATA_SIZE = 1 << DATA_WIDTH;
+
+    input [DATA_SIZE-1:0] i_value;
     input i_clk;
     input i_reset;
 
@@ -40,8 +43,8 @@ module shift_reg_output
 
     reg[1:0] current_state;
     
-    reg [7:0] shift_value;
-    reg [4:0] shift_cnt;
+    reg [DATA_SIZE-1:0] shift_value;
+    reg [DATA_WIDTH+1:0] shift_cnt;
 
     //assign o_curr_state = current_state;
 
@@ -86,7 +89,7 @@ module shift_reg_output
                 o_ds <= shift_value[0];
                 o_sh_cp <= 0;
                 o_st_cp <= 0;
-                if(shift_cnt == 'd8) begin
+                if(shift_cnt == DATA_SIZE) begin
                   current_state <= STORE_STATE;
                 end
                 else begin

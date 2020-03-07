@@ -13,7 +13,7 @@
 
 // In simulation we have the states change every 64 ticks, so we have a 
 // relatively low number of overall ticks to see if our circuit is working.
-constexpr float AmountSimulationTicksPerFrame = 1 / 10.0f;
+constexpr float AmountSimulationTicksPerFrame = 1 / 5.0f;
 
 int main(int argc, char** argv)
 {
@@ -36,10 +36,11 @@ int main(int argc, char** argv)
     textures.decimalOff.loadFromFile("assets/dp_segment_off.png");
     textures.decimalOn.loadFromFile("assets/dp_segment_on.png");
 
-    SerInParOutShiftReg<unsigned char> shiftReg;
+    SerInParOutShiftReg<unsigned short> shiftReg;
 
-    SevenSegDisplay seg(textures);
-    seg.position = sf::Vector2f(100.0f, 100.0f);
+    SevenSegDisplay seg(textures),seg2(textures);
+    seg.position = sf::Vector2f(220.0f, 100.0f);
+    seg2.position = sf::Vector2f(100.0f, 100.0f);
 
     float simAmount = 0.0f;
     // Start the game loop
@@ -71,8 +72,9 @@ int main(int argc, char** argv)
             }
             if (tb->m_core->PIN_3) {
                 console->info(
-                        "tick! num={:x}, seg_out={:x}, our_reg={:x}", 
-                        tb->m_core->o_num, 
+                        //"tick! num={:x}, seg_out={:x}, our_reg={:x}", 
+                        "tick! seg_out={:016b}, our_reg={:016b}", 
+                        //tb->m_core->o_num, 
                         tb->m_core->o_seg_out, 
                         shiftReg.getLatchedValue()
                     );
@@ -89,7 +91,13 @@ int main(int argc, char** argv)
             seg.setSegment(static_cast<Segment>(ii), shiftReg.getBitValue(ii));
         }
 
+        for(int ii = 7; ii < 7+SegmentMax; ++ii) {
+            auto val = shiftReg.getBitValue(ii);
+            seg2.setSegment(static_cast<Segment>(ii-8), val);
+        }
+
         seg.draw(*renderWin.get());
+        seg2.draw(*renderWin.get());
 
         // Update the window
         renderWin->display();
