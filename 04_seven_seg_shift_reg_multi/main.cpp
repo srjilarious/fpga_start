@@ -38,9 +38,14 @@ int main(int argc, char** argv)
 
     SerInParOutShiftReg<unsigned short> shiftReg;
 
-    SevenSegDisplay seg(textures),seg2(textures);
-    seg.position = sf::Vector2f(220.0f, 100.0f);
-    seg2.position = sf::Vector2f(100.0f, 100.0f);
+    const int NumSegments = 2;
+    SevenSegDisplay segments[NumSegments] = { SevenSegDisplay(textures), SevenSegDisplay(textures)};
+
+    sf::Vector2f pos = {100.0f, 100.0f};
+    for(int idx = NumSegments-1; idx >= 0; idx--) {
+        segments[idx].position = pos;
+        pos.x += 130.0f;
+    }
 
     float simAmount = 0.0f;
     // Start the game loop
@@ -87,17 +92,14 @@ int main(int argc, char** argv)
         // Clear screen
         renderWin->clear();// clearColor);
 
-        for(int ii = 0; ii < SegmentMax; ++ii) {
-            seg.setSegment(static_cast<Segment>(ii), shiftReg.getBitValue(ii));
-        }
+        for(int idx = 0; idx < NumSegments; idx++) {
+            for(int ii = 0; ii < SegmentMax; ++ii) {
+                auto whichBit = idx*SegmentMax+ii;
+                segments[idx].setSegment(static_cast<Segment>(ii), shiftReg.getBitValue(whichBit));
+            }
 
-        for(int ii = 7; ii < 7+SegmentMax; ++ii) {
-            auto val = shiftReg.getBitValue(ii);
-            seg2.setSegment(static_cast<Segment>(ii-8), val);
+            segments[idx].draw(*renderWin.get());
         }
-
-        seg.draw(*renderWin.get());
-        seg2.draw(*renderWin.get());
 
         // Update the window
         renderWin->display();
