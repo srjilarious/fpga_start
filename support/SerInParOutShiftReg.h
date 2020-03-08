@@ -28,6 +28,7 @@ public:
     void update(bool dataIn, bool dataClock, bool latch);
 
     bool getBitValue(unsigned int which) const;
+    unsigned char getSubByte(unsigned int startBit) const;
     Storage getLatchedValue() const { return mLatched; }
 };
 
@@ -62,4 +63,11 @@ bool
 SerInParOutShiftReg<Storage>::getBitValue(unsigned int which) const
 {
     return (mLatched & (1 << which)) != 0;
+}
+
+template<typename Storage>
+unsigned char 
+SerInParOutShiftReg<Storage>::getSubByte(unsigned int startBit) const
+{
+    return (mLatched & (0xff << startBit)) >> startBit;
 }
