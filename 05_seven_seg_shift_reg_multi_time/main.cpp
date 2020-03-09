@@ -82,7 +82,7 @@ int main(int argc, char** argv)
             if (tb->m_core->PIN_3) {
                 console->info(
                         //"tick! num={:x}, seg_out={:x}, our_reg={:x}", 
-                        "tick! curr seg = {}, seg display = {:02x}", 
+                        "tick! curr seg = {:08b}, seg display = {:02x}", 
                         shiftReg.getSubByte(8),
                         shiftReg.getSubByte(0)
                     );
@@ -93,7 +93,27 @@ int main(int argc, char** argv)
         // Clear screen
         renderWin->clear();
 
-        auto currSegment = shiftReg.getSubByte(8);
+        auto currSegmentOneHot = shiftReg.getSubByte(8);
+        decltype(currSegmentOneHot) currSegment = 0;
+        
+        switch(currSegmentOneHot) {
+            case 0b001: 
+                currSegment = 0;
+                break;
+
+            case 0b010: 
+                currSegment = 1;
+                break;
+
+            case 0b100: 
+                currSegment = 2;
+                break;
+
+            default: 
+                currSegment = 0;
+                break;
+        }
+
         for(int idx = 0; idx < NumSegments; ++idx) {
             for(int ii = 0; ii < SegmentMax; ++ii) {
                 if(idx == currSegment) {

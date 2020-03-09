@@ -12,6 +12,7 @@ set(SIM_SRC_FILES
 set(SUPPORTING_VERILOG_FILES 
     ../lib/hex_to_7seg.v
     ../lib/shift_reg_output.v
+    ../lib/one_hot_encoder.v
  )
 
  # Call our project macro to setup simulation and synthesis projects

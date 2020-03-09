@@ -50,6 +50,7 @@ module top (
     // The values of the current hex digit we're displaying.
     reg [3:0] curr_digit_values;
     reg [1:0] curr_digit_selected;
+    wire [7:0] curr_digit_selected_one_hot;
 
     wire [15:0] shift_reg_value;
 
@@ -69,6 +70,11 @@ module top (
             sh_clk,
             sh_latch
         );
+
+    one_hot_encoder hot_encoder(
+        .i_val({1'b0, curr_digit_selected}),
+        .o_one_hot_val(curr_digit_selected_one_hot)
+    );
 
     // Update our counter and the logic on which digit of our 3 segments
     // we want to send out through the shift register.
@@ -92,7 +98,7 @@ module top (
 
     // light up the LED according to the pattern
     assign LED = counter[LED_BLINK_BIT];
-    assign shift_reg_value = {6'b0, curr_digit_selected, seg_out};
+    assign shift_reg_value = {curr_digit_selected_one_hot, seg_out};
     assign PIN_1 = sh_ds;
     assign PIN_2 = sh_clk;
     assign PIN_3 = sh_latch;
