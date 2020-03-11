@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 
         auto currSegmentOneHot = shiftReg.getSubByte(8);
         decltype(currSegmentOneHot) currSegment = 0;
-        
+
         switch(currSegmentOneHot) {
             case 0b001: 
                 currSegment = 0;
