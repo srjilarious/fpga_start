@@ -47,7 +47,7 @@ module top (
     wire [7:0] seg_out;
     wire _seg_unused;
 
-    hex_to_7seg segDisplay(counter[HIGH_BIT:LOW_BIT], seg_out);
+    hex_to_7seg segDisplay(.i_val(counter[HIGH_BIT:LOW_BIT]), .o_segVals(seg_out));
 
     // increment the blink_counter every clock
     always @(posedge CLK) begin
