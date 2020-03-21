@@ -6,8 +6,6 @@
 
 #include <SFML/Graphics.hpp>
 
-#include "SevenSegDisplay.h"
-
 #include <memory>
 
 // In simulation we have the states change every 64 ticks, so we have a 
@@ -16,30 +14,23 @@ constexpr float AmountSimulationTicksPerFrame = 1/60.0f;
 
 int main(int argc, char **argv) 
 {
+    printf("testtetest.");
     Verilated::commandArgs(argc, argv);
     auto tb = std::make_unique<TestBench<Vtop>>();
 
-    tb->openTrace("trace.vcd");
+    // For this example we won't worry about generating a wave trace.
+    //tb->openTrace("trace.vcd");
 
     auto console = spdlog::stdout_color_mt("simulation");
-    console->info("Seven Segment Parallel Simulation!");
+    console->info("SFML State Machine Example!");
 
     auto renderWin = std::make_unique<sf::RenderWindow>(
                 sf::VideoMode(800, 600), "Seven Segment Display Simulation");
 
-    SevenSegDisplayTextures textures;
-    textures.horzOff.loadFromFile("assets/horz_segment_off.png");
-    textures.horzOn.loadFromFile("assets/horz_segment_on.png");
-    textures.vertOff.loadFromFile("assets/vert_segment_off.png");
-    textures.vertOn.loadFromFile("assets/vert_segment_on.png");
-    textures.decimalOff.loadFromFile("assets/dp_segment_off.png");
-    textures.decimalOn.loadFromFile("assets/dp_segment_on.png");
-
-    SevenSegDisplay seg(textures);
-    seg.position = sf::Vector2f(100.0f, 100.0f);
 
     float simAmount = 0.0f;
-    // Start the game loop
+
+    // Start the simulation loop
     while (renderWin->isOpen())
     {
         // Process events
@@ -56,26 +47,14 @@ int main(int argc, char **argv)
         {
             tb->tick();
             console->info(".");
-
             simAmount -= 1.0f;
         }
 
 
-        //sf::Color clearColor = sf::Color( 64, tb->m_core->LED ? 128 : 64, 64, 255);
+        sf::Color clearColor = sf::Color( 64, tb->m_core->LED ? 128 : 64, 64, 255);
 
         // Clear screen
-        renderWin->clear();// clearColor);
-
-        seg.setSegment(Segment::A, tb->m_core->PIN_1);
-        seg.setSegment(Segment::B, tb->m_core->PIN_2);
-        seg.setSegment(Segment::C, tb->m_core->PIN_3);
-        seg.setSegment(Segment::D, tb->m_core->PIN_4);
-        seg.setSegment(Segment::E, tb->m_core->PIN_5);
-        seg.setSegment(Segment::F, tb->m_core->PIN_6);
-        seg.setSegment(Segment::G, tb->m_core->PIN_7);
-        seg.setSegment(Segment::DP, tb->m_core->PIN_8);
-
-        seg.draw(*renderWin.get());
+        renderWin->clear( clearColor);
 
         // Update the window
         renderWin->display();

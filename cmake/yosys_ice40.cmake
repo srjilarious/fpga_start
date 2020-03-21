@@ -11,7 +11,7 @@
 function(ice40_synthesis)
 
   # Define arguments to our function
-  set(options "")
+  set(options SYNTH_BY_DEFAULT)
   set(oneValueArgs 
         TARGET 
         TOP_LEVEL_VERILOG
@@ -41,6 +41,13 @@ function(ice40_synthesis)
     message("-- Using default pins.pcf file for pin constraints.")
   else()
     message("-- Using '${SYNTH_PCF_FILE}' for pin constraints.")
+  endif()
+
+  # Custom target to run yosys synthesis steps
+  if(${SYNTH_SYNTH_BY_DEFAULT})
+    add_custom_target(${SYNTH_TARGET} ALL)
+  else()
+    add_custom_target(${SYNTH_TARGET})
   endif()
 
   get_filename_component(TOP_LEVEL_NAME ${SYNTH_TOP_LEVEL_VERILOG} NAME_WE)
