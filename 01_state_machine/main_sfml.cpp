@@ -14,7 +14,6 @@ constexpr float AmountSimulationTicksPerFrame = 1/60.0f;
 
 int main(int argc, char **argv) 
 {
-    printf("testtetest.");
     Verilated::commandArgs(argc, argv);
     auto tb = std::make_unique<TestBench<Vtop>>();
 

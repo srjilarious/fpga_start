@@ -60,11 +60,8 @@ int main(int argc, char **argv)
             simAmount -= 1.0f;
         }
 
-
-        //sf::Color clearColor = sf::Color( 64, tb->m_core->LED ? 128 : 64, 64, 255);
-
         // Clear screen
-        renderWin->clear();// clearColor);
+        renderWin->clear();
 
         seg.setSegment(Segment::A, tb->m_core->PIN_1);
         seg.setSegment(Segment::B, tb->m_core->PIN_2);
