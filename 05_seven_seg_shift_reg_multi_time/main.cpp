@@ -36,7 +36,8 @@ int main(int argc, char** argv)
     textures.decimalOff.loadFromFile("assets/dp_segment_off.png");
     textures.decimalOn.loadFromFile("assets/dp_segment_on.png");
 
-    SerInParOutShiftReg<unsigned short> shiftReg;
+    const int NumShiftRegs = 2;
+    SerInParOutShiftReg<NumShiftRegs> shiftReg;
 
     const int NumSegments = 3;
     SevenSegDisplay segments[NumSegments] = { 
@@ -83,7 +84,7 @@ int main(int argc, char** argv)
                 console->info(
                         //"tick! num={:x}, seg_out={:x}, our_reg={:x}", 
                         "tick! curr seg = {:08b}, seg display = {:02x}", 
-                        shiftReg.getSubByte(8),
+                        shiftReg.getSubByte(1),
                         shiftReg.getSubByte(0)
                     );
             }
@@ -93,7 +94,7 @@ int main(int argc, char** argv)
         // Clear screen
         renderWin->clear();
 
-        auto currSegmentOneHot = shiftReg.getSubByte(8);
+        auto currSegmentOneHot = shiftReg.getSubByte(1);
         decltype(currSegmentOneHot) currSegment = 0;
 
         switch(currSegmentOneHot) {

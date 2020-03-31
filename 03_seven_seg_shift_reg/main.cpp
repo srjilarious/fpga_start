@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     textures.decimalOff.loadFromFile("assets/dp_segment_off.png", fullRect);
     textures.decimalOn.loadFromFile("assets/dp_segment_on.png", fullRect);
 
-    SerInParOutShiftReg<unsigned char> shiftReg;
+    SerInParOutShiftReg<1> shiftReg;
 
     SevenSegDisplay seg(textures);
     seg.position = sf::Vector2f(100.0f, 100.0f);
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
                         "tick! num={:x}, seg_out={:x}, our_reg={:x}", 
                         tb->m_core->o_num, 
                         tb->m_core->o_seg_out, 
-                        shiftReg.getLatchedValue()
+                        shiftReg.getSubByte(0)
                     );
             }
             simAmount -= 1.0f;
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
         // Clear screen
         renderWin->clear();// clearColor);
 
-        for(int ii = 0; ii < SegmentMax; ++ii) {
+        for(std::size_t ii = 0; ii < SegmentMax; ++ii) {
             seg.setSegment(static_cast<Segment>(ii), shiftReg.getBitValue(ii));
         }
 

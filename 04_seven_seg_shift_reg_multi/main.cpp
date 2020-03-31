@@ -36,9 +36,9 @@ int main(int argc, char** argv)
     textures.decimalOff.loadFromFile("assets/dp_segment_off.png");
     textures.decimalOn.loadFromFile("assets/dp_segment_on.png");
 
-    SerInParOutShiftReg<unsigned short> shiftReg;
-
     const int NumSegments = 2;
+    SerInParOutShiftReg<NumSegments> shiftReg;
+
     SevenSegDisplay segments[NumSegments] = { SevenSegDisplay(textures), SevenSegDisplay(textures)};
 
     sf::Vector2f pos = {100.0f, 100.0f};
@@ -78,10 +78,11 @@ int main(int argc, char** argv)
             if (tb->m_core->PIN_3) {
                 console->info(
                         //"tick! num={:x}, seg_out={:x}, our_reg={:x}", 
-                        "tick! seg_out={:016b}, our_reg={:016b}", 
+                        "tick! seg_out={:016b}, our_reg={:08b} {:08b}", 
                         //tb->m_core->o_num, 
                         tb->m_core->o_seg_out, 
-                        shiftReg.getLatchedValue()
+                        shiftReg.getSubByte(1),
+                        shiftReg.getSubByte(0)
                     );
             }
             simAmount -= 1.0f;

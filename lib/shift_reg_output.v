@@ -76,7 +76,8 @@ module shift_reg_output
             begin
                 o_ds <= shift_value[0];
 
-                o_sh_cp <= 1; // clock goes high, meaning the value of data should be sampled.
+                // clock goes high, meaning the value of data should be sampled.
+                o_sh_cp <= 1; 
                 o_st_cp <= 0;
 
                 shift_value <= shift_value >> 1;
