@@ -1,6 +1,5 @@
 // This module shifts out data to a 74HC595 shift register given
-// a maximum 16 MHz clock input (from Tiny FPGA BX).  
-// It doesn't support any reset functionality at the moment and just streams the value 
+// a maximum 16 MHz clock input (from Tiny FPGA BX).
 //
 // Module based on information from:
 //   https://components101.com/ics/74hc595-shift-register-pinout-datasheet
