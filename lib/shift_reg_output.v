@@ -8,6 +8,8 @@ module shift_reg_output
     (
         i_clk
         , i_reset
+
+        // The value we want to shift out serially.
         , i_value
 
         // toggle switch to stream out the data.
@@ -26,7 +28,7 @@ module shift_reg_output
     );
 
     // A parameter that lets us parameterize the shift register over the 2^n bits 
-    // we want to shift out.
+    // we want to shift out.  By default we use a single byte (2^3 bits)
     parameter DATA_WIDTH = 3;
     localparam DATA_SIZE = 1 << DATA_WIDTH;
 

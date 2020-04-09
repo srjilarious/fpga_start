@@ -1,4 +1,4 @@
-
+// A 4bit (single hex digit) to 7segment display decoder.
 module hex_to_7seg
     (
         i_val
