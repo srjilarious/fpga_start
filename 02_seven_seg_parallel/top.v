@@ -42,14 +42,12 @@ module top (
     // We'll use four update ticks per state.
     localparam NUM_CYCLES_PER_STATE = 4*NUM_CYCLES_PER_UPDATE;
 
-    // Provide some names for the constant values of our states.
-    
     wire [7:0] seg_out;
-    wire _seg_unused;
+    wire _seg_unused; // Used later to avoid an error.
 
     hex_to_7seg segDisplay(.i_val(counter[HIGH_BIT:LOW_BIT]), .o_segVals(seg_out));
 
-    // increment the blink_counter every clock
+    // increment the counter every clock
     always @(posedge CLK) begin
         counter <= counter + 1;
     end
