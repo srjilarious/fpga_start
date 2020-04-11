@@ -28,7 +28,9 @@ module top (
 `endif
 
     wire [7:0] seg_out;
-    wire _seg_unused; // Used later to avoid an error.
+
+    // Used later to avoid a warning.
+    wire _seg_unused;
 
     hex_to_7seg segDisplay(
             .i_val(counter[HIGH_BIT:LOW_BIT]), 
@@ -44,7 +46,7 @@ module top (
     assign LED = counter[LED_BLINK_BIT];
 
     assign {PIN_7, PIN_6, PIN_5, PIN_4, PIN_3, PIN_2, PIN_1} = seg_out[6:0];
-    assign _seg_unused = &{1'b0, seg_out[7]};
+    assign _seg_unused = seg_out[7];
     assign PIN_8 = counter[LED_BLINK_BIT];
 
 endmodule
