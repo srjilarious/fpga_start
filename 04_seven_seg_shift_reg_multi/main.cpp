@@ -11,8 +11,6 @@
 
 #include <memory>
 
-// In simulation we have the states change every 64 ticks, so we have a 
-// relatively low number of overall ticks to see if our circuit is working.
 constexpr float AmountSimulationTicksPerFrame = 1 / 5.0f;
 
 int main(int argc, char** argv)
@@ -77,9 +75,7 @@ int main(int argc, char** argv)
             }
             if (tb->m_core->PIN_3) {
                 console->info(
-                        //"tick! num={:x}, seg_out={:x}, our_reg={:x}", 
                         "tick! seg_out={:016b}, our_reg={:08b} {:08b}", 
-                        //tb->m_core->o_num, 
                         tb->m_core->o_seg_out, 
                         shiftReg.getSubByte(1),
                         shiftReg.getSubByte(0)
@@ -88,10 +84,8 @@ int main(int argc, char** argv)
             simAmount -= 1.0f;
         }
 
-        //sf::Color clearColor = sf::Color( 64, tb->m_core->LED ? 128 : 64, 64, 255);
-
         // Clear screen
-        renderWin->clear();// clearColor);
+        renderWin->clear();
 
         for(int idx = 0; idx < NumSegments; idx++) {
             for(int ii = 0; ii < SegmentMax; ++ii) {

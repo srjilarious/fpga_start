@@ -16,36 +16,24 @@ module top (
     assign USBPU = 0;
 
     reg [28:0] counter;
-    //reg [1:0] curr_state;
 
 `ifdef SIMULATION
-    // When running the simulation, we will lower the number of cycles to make 
-    // it easier to read the waveform output.
-    localparam NUM_CYCLES_PER_UPDATE = 1 << 4;
     localparam HIGH_BIT = 7;
     localparam LOW_BIT = 4;
     localparam LED_BLINK_BIT = 2;
 `else
-    // On the real board, our clock is 16MHz, so in order to see the LED pattern
-    // we need to consider how many cycle ticks we should have.  In our case
-    // 16*1000*1000 is one second, which is roughly when the 24th bit toggles.
-    // We'll use that as our algorithm's tick delay.
-    localparam NUM_CYCLES_PER_UPDATE = 1 << 24;
-
     localparam HIGH_BIT = 27;
     localparam LOW_BIT = 24;
-
-    // We want the blink pattern to be 4 times per update tick, aka 2 bits less.
     localparam LED_BLINK_BIT = 22;
 `endif
-
-    // We'll use four update ticks per state.
-    localparam NUM_CYCLES_PER_STATE = 4*NUM_CYCLES_PER_UPDATE;
 
     wire [7:0] seg_out;
     wire _seg_unused; // Used later to avoid an error.
 
-    hex_to_7seg segDisplay(.i_val(counter[HIGH_BIT:LOW_BIT]), .o_segVals(seg_out));
+    hex_to_7seg segDisplay(
+            .i_val(counter[HIGH_BIT:LOW_BIT]), 
+            .o_seg_vals(seg_out)
+        );
 
     // increment the counter every clock
     always @(posedge CLK) begin

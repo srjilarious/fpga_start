@@ -3,7 +3,6 @@
 //
 // Module based on information from:
 //   https://components101.com/ics/74hc595-shift-register-pinout-datasheet
-// Datasheet:
 module shift_reg_output
     (
         i_clk
@@ -45,7 +44,12 @@ module shift_reg_output
     output reg o_data_val;
     output reg o_data_clock;
     output reg o_latch_shifted_value;
+
+    // An output I used when debugging the circuit initially.  It made it easy 
+    // to see in the waveform generated during simulation what the state machine
+    // was doing and how the values were lining up with what I expected.
     //output [1:0] o_curr_state;
+    //assign o_curr_state = current_state;
 
     // Our state machine state constants.
     localparam WAIT_STATE = 0;
@@ -59,7 +63,6 @@ module shift_reg_output
     reg [DATA_SIZE-1:0] shift_value;
     reg [DATA_WIDTH+1:0] shift_cnt;
 
-    //assign o_curr_state = current_state;
 
     always @(posedge i_clk) 
     begin

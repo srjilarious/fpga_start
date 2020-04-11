@@ -10,8 +10,6 @@
 
 #include <memory>
 
-// In simulation we have the states change every 64 ticks, so we have a 
-// relatively low number of overall ticks to see if our circuit is working.
 constexpr float AmountSimulationTicksPerFrame = 1/60.0f;
 
 int main(int argc, char **argv) 
@@ -19,7 +17,8 @@ int main(int argc, char **argv)
     Verilated::commandArgs(argc, argv);
     auto tb = std::make_unique<TestBench<Vtop>>();
 
-    tb->openTrace("trace.vcd");
+    // Uncomment if you want the waveform to be generated.
+    //tb->openTrace("trace.vcd");
 
     auto console = spdlog::stdout_color_mt("simulation");
     console->info("Seven Segment Parallel Simulation!");
