@@ -56,19 +56,23 @@ module top (
 
     // We only need one seven-segment decoder, since it will be multiplexed
     // over time to show the correct digit.
-    hex_to_7seg segDisplay(curr_digit_values, seg_out);
+    hex_to_7seg segDisplay(
+            .i_val(curr_digit_values),
+            .o_seg_vals(seg_out)
+        );
 
     // Create a 16 bit (2^4) shift register.
     shift_reg_output #(
         .DATA_WIDTH(4)
-        ) shiftReg (
-            CLK, 
-            1'b0,
-            shift_reg_value,
-            counter[TIME_TICK_BIT],
-            sh_ds,
-            sh_clk,
-            sh_latch
+        )s hiftReg(
+            .i_clk(CLK),
+            .i_reset(1'b0),
+            .i_value(shift_reg_value),
+            .i_enable_toggle(counter[TIME_TICK_BIT]),
+
+            .o_data_val(sh_ds),
+            .o_data_clock(sh_clk),
+            .o_latch_shifted_value(sh_latch)
         );
 
     one_hot_encoder hot_encoder(
