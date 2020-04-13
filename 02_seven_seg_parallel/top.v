@@ -8,8 +8,8 @@ module top (
     , output PIN_3  // 7-seg 'c'
     , output PIN_4  // 7-seg 'd'
     , output PIN_5  // 7-seg 'e'
-    , output PIN_6  // 7-seg 'f'
-    , output PIN_7  // 7-seg 'g'
+    , output PIN_6  // 7-seg 'g'
+    , output PIN_7  // 7-seg 'f'
     , output PIN_8  // 7-seg 'dp'
 );
     // drive USB pull-up resistor to '0' to disable USB
