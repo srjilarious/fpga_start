@@ -64,7 +64,7 @@ module top (
     // Create a 16 bit (2^4) shift register.
     shift_reg_output #(
         .DATA_WIDTH(4)
-        )s hiftReg(
+        ) shiftReg(
             .i_clk(CLK),
             .i_reset(1'b0),
             .i_value(shift_reg_value),
