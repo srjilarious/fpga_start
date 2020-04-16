@@ -60,10 +60,18 @@ module top (
     assign w_clk_40mhz = CLK;
 `endif
 
+    reg [2:0] counter;
+
+    //wire w_clk_sprite;
+
     /* verilator lint_off UNUSED */
     wire [15:0] w_horz_coord;
     wire [15:0] w_vert_coord;
+
+    reg [15:0] spr_x_coord = 0;
+    reg [15:0] spr_y_coord = 0;
     /* verilator lint_on UNUSED */
+
     wire w_is_active_area;
     
     wire [2:0] w_red;
@@ -80,20 +88,38 @@ module top (
         , .o_vert_sync(PIN_10)
     );
 
+    always @(posedge PIN_10) begin
+        counter <= counter + 1;
+
+        if(spr_x_coord == 800) begin
+            spr_x_coord <= 0;
+            if(spr_y_coord == 600) begin 
+                spr_y_coord <= 0;
+            end else begin
+                spr_y_coord <= spr_y_coord + 1;
+            end
+        end else begin
+            spr_x_coord <= spr_x_coord + 1;
+        end;
+    end
+
+    //assign w_clk_sprite = counter[2];
+
     sprite spr1(
         .i_pix_clk(w_clk_40mhz)
         // , i_reset
-        , .i_horz_coord({3'b0, w_horz_coord[15:3]})
-        , .i_vert_coord({3'b0, w_vert_coord[15:3]})
+        , .i_horz_coord(w_horz_coord)
+        , .i_vert_coord(w_vert_coord)
 
-        , .i_x_coord(10)
-        , .i_y_coord(10)
+        , .i_x_coord(spr_x_coord)
+        , .i_y_coord(spr_y_coord)
         , .i_in_active_area(w_is_active_area)
 
         , .o_red(w_red)
         , .o_green(w_green)
         , .o_blue(w_blue)
     );
+
 
     assign {PIN_3, PIN_2, PIN_1} = w_red;
     assign {PIN_6, PIN_5, PIN_4} = w_green;

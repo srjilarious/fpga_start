@@ -36,12 +36,16 @@ const int VertCycles = VertPixelCount + VertFrontPorch + VertSyncPulse + VertBac
 // The number of cycles our module needs to run per frame to generate a frame.
 const int NumSimulationTicksPerFrame = HorzScanLineCycles*VertCycles;
 
+//#define DUMP_SINGLE_FRAME 1
+
 int main(int argc, char **argv) 
 {
     Verilated::commandArgs(argc, argv);
     auto tb = std::make_unique<TestBench<Vtop>>();
 
-    //tb->openTrace("trace.vcd");
+    #if DUMP_SINGLE_FRAME
+        tb->openTrace("trace.vcd");
+    #endif
 
     auto console = spdlog::stdout_color_mt("simulation");
     console->info("Welcome to the sprite test!");
@@ -116,10 +120,15 @@ int main(int argc, char **argv)
         renderWin->draw(sprite);
         // Update the window
         renderWin->display();
-        //break;
+
+        #if DUMP_SINGLE_FRAME
+            break;
+        #endif
     }
 
-    //tb->closeTrace();
+    #if DUMP_SINGLE_FRAME
+        tb->closeTrace();
+    #endif
 
     delete [] pixelArray;
 

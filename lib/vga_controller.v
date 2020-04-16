@@ -85,8 +85,10 @@ module vga_controller
        end
     end
 
-    assign o_horz_coord = (horz_counter < HORZ_PIXEL_COUNT) ? horz_counter : 16'b0;
-    assign o_vert_coord = (horz_counter < HORZ_PIXEL_COUNT) ? vert_counter : 16'b0;
+    assign o_horz_coord = horz_counter;
+    //(horz_counter < HORZ_PIXEL_COUNT) ? horz_counter : 16'b0;
+    assign o_vert_coord = vert_counter;
+    //(horz_counter < HORZ_PIXEL_COUNT) ? vert_counter : 16'b0;
     assign o_in_active_area = (horz_counter < HORZ_PIXEL_COUNT) && (vert_counter < VERT_PIXEL_COUNT);
     assign o_horz_sync = ((horz_counter >= HORZ_SYNC_START) && (horz_counter < HORZ_SYNC_END));
     assign o_vert_sync = ((vert_counter >= VERT_SYNC_START) && (vert_counter < VERT_SYNC_END));
