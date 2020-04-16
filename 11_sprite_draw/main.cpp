@@ -116,6 +116,7 @@ int main(int argc, char **argv)
         renderWin->draw(sprite);
         // Update the window
         renderWin->display();
+        //break;
     }
 
     //tb->closeTrace();

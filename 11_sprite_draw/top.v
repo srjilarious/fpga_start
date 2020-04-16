@@ -83,8 +83,11 @@ module top (
     sprite spr1(
         .i_pix_clk(w_clk_40mhz)
         // , i_reset
-        , .i_horz_coord({2'b0, w_horz_coord[15:2]})
-        , .i_vert_coord({2'b0, w_vert_coord[15:2]})
+        , .i_horz_coord({3'b0, w_horz_coord[15:3]})
+        , .i_vert_coord({3'b0, w_vert_coord[15:3]})
+
+        , .i_x_coord(10)
+        , .i_y_coord(10)
         , .i_in_active_area(w_is_active_area)
 
         , .o_red(w_red)
