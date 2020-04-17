@@ -68,8 +68,12 @@ module top (
     wire [15:0] w_horz_coord;
     wire [15:0] w_vert_coord;
 
-    reg [15:0] spr_x_coord = 0;
-    reg [15:0] spr_y_coord = 0;
+    reg signed [15:0] spr_x_coord = 0;
+    reg signed [15:0] spr_y_coord = 0;
+
+    reg signed [15:0] spr_x_vel = 5;
+    reg signed [15:0] spr_y_vel = 6;
+
     /* verilator lint_on UNUSED */
 
     wire w_is_active_area;
@@ -88,19 +92,48 @@ module top (
         , .o_vert_sync(PIN_10)
     );
 
+    wire signed [15:0] next_x_coord, next_y_coord;
+    assign next_x_coord = spr_x_coord + spr_x_vel;
+    assign next_y_coord = spr_y_coord + spr_y_vel;
+
+    // Have the sprite bounce around the screen.
     always @(posedge PIN_10) begin
         counter <= counter + 1;
 
-        if(spr_x_coord == 800) begin
+        if(next_x_coord >= 800) begin
+            spr_x_vel <= -spr_x_vel;
+            spr_x_coord <= 799;
+        end
+        else if(next_x_coord < 0) begin
+            spr_x_vel <= -spr_x_vel;
             spr_x_coord <= 0;
-            if(spr_y_coord == 600) begin 
-                spr_y_coord <= 0;
-            end else begin
-                spr_y_coord <= spr_y_coord + 1;
-            end
-        end else begin
-            spr_x_coord <= spr_x_coord + 1;
-        end;
+        end
+        else begin
+            spr_x_coord <= next_x_coord;
+        end
+
+        if(next_y_coord >= 600) begin
+            spr_y_vel <= -spr_y_vel;
+            spr_y_coord <= 599;
+        end
+        else if(next_y_coord < 0) begin
+            spr_y_vel <= -spr_y_vel;
+            spr_y_coord <= 0;
+        end
+        else begin
+            spr_y_coord <= next_y_coord;
+        end
+
+        // if(spr_x_coord == 800) begin
+        //     spr_x_coord <= 0;
+        //     if(spr_y_coord == 600) begin 
+        //         spr_y_coord <= 0;
+        //     end else begin
+        //         spr_y_coord <= spr_y_coord + 1;
+        //     end
+        // end else begin
+        //     spr_x_coord <= spr_x_coord + 1;
+        // end;
     end
 
     //assign w_clk_sprite = counter[2];
