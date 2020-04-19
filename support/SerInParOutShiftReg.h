@@ -46,10 +46,10 @@ SerInParOutShiftReg<NumRegs>::update(
     )
 {
     if(dataClock && !mPrevDataClock) {
-        mShiftData >>= 1;
+        mShiftData <<= 1;
 
-        // Set the highest bit to the incoming value.
-        mShiftData.set(NumBits-1, dataIn);
+        // Set the lowest bit to the incoming value.
+        mShiftData.set(0, dataIn);
     }
     mPrevDataClock = dataClock;
 

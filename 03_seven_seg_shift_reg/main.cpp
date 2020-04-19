@@ -11,7 +11,7 @@
 
 #include <memory>
 
-constexpr float AmountSimulationTicksPerFrame = 1 / 10.0f;
+constexpr float AmountSimulationTicksPerFrame = 1 / 5.0f;
 
 int main(int argc, char** argv)
 {
@@ -19,7 +19,7 @@ int main(int argc, char** argv)
     auto tb = std::make_unique<TestBench<Vtop>>();
 
     // Uncomment if you want the waveform to be generated.
-    //tb->openTrace("trace.vcd");
+    tb->openTrace("trace.vcd");
 
     auto console = spdlog::stdout_color_mt("simulation");
     console->info("Seven Segment Shift Register Simulation!");

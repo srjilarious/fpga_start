@@ -17,13 +17,15 @@ module top (
     reg [28:0] counter;
 
 `ifdef SIMULATION
-    localparam HIGH_BIT = 8;
-    localparam LOW_BIT = 5;
-    localparam LED_BLINK_BIT = 2;
+    localparam HIGH_BIT = 9;
+    localparam LOW_BIT = 6;
+    localparam LED_BLINK_BIT = 3;
+    localparam CLOCK_BIT = 0;
 `else
     localparam HIGH_BIT = 27;
     localparam LOW_BIT = 24;
     localparam LED_BLINK_BIT = 22;
+    localparam CLOCK_BIT = 12;
 `endif
     
     wire [7:0] seg_out;
@@ -34,11 +36,14 @@ module top (
             .o_seg_vals(seg_out)
         );
 
+    reg shift_reg_clock = 0; 
+    reg shift_toggle = 0;
+
     shift_reg_output shiftReg(
-            .i_clk(CLK),
+            .i_clk(shift_reg_clock),
             .i_reset(1'b0),
-            .i_value(seg_out),
-            .i_enable_toggle(counter[LOW_BIT]),
+            .i_value({shift_toggle, seg_out[6:0]}),
+            .i_enable_toggle(shift_toggle),
 
             .o_data_val(sh_ds),
             .o_data_clock(sh_clk),
@@ -48,6 +53,8 @@ module top (
     // increment the blink_counter every clock
     always @(posedge CLK) begin
         counter <= counter + 1;
+        shift_reg_clock <= counter[CLOCK_BIT];
+        shift_toggle <= counter[LOW_BIT];
     end
 
     // light up the LED according to the pattern

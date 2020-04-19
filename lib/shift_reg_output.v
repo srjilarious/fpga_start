@@ -50,7 +50,7 @@ module shift_reg_output
     localparam STORE_STATE = 3;
 
     // We have four states, so we can hold our state in two bits.
-    reg[1:0] current_state;
+    reg[1:0] current_state = WAIT_STATE;
     
     reg [DATA_SIZE-1:0] shift_value;
     reg [DATA_WIDTH+1:0] shift_cnt;
@@ -73,7 +73,7 @@ module shift_reg_output
                 current_state <= SHIFT_STATE; 
                 shift_value <= i_value;
                 shift_cnt <= 0;
-                o_data_val <= i_value[0];
+                o_data_val <= i_value[DATA_SIZE-1];
               end
               else begin
                 o_data_val <= 0;
@@ -85,19 +85,15 @@ module shift_reg_output
 
             SHIFT_STATE:
             begin
-                // Load up our output bit with the LSB from our current 
-                // shift_value register.
-                o_data_val <= shift_value[0];
-
                 // clock goes high, meaning the value of data should be 
                 // sampled on the receiving end.
                 o_data_clock <= 1; 
                 o_latch_shifted_value <= 0;
 
-                // Since we latch the LSB in this clock tick, we also want
+                // Since we latch the MSB in this clock tick, we also want
                 // to shift our value over by one for the next time we want
                 // to load a bit for output.
-                shift_value <= shift_value >> 1;
+                shift_value <= shift_value << 1;
                 shift_cnt <= shift_cnt + 1;
 
                 current_state <= SHIFT_TICK;
@@ -107,7 +103,8 @@ module shift_reg_output
             begin
                 // Set the output value to the upcoming bit value for the next
                 // tick.
-                o_data_val <= shift_value[0];
+                o_data_val <= shift_value[DATA_SIZE-1];
+                
                 o_data_clock <= 0;
                 o_latch_shifted_value <= 0;
 
@@ -126,7 +123,6 @@ module shift_reg_output
             begin
                 // Raise the latch signal high so that the receiving shift reg
                 // will store the current data and present it on its outputs.
-                o_data_val <= 0;
                 o_data_clock <= 0;
                 o_latch_shifted_value <= 1;
                 current_state <= WAIT_STATE;
