@@ -2,6 +2,8 @@
 #include "Vtop.h"
 
 #include <memory>
+#include <chrono>
+#include <thread>
 #include <SFML/Graphics.hpp>
 
 #include <spdlog/spdlog.h>
@@ -120,6 +122,8 @@ int main(int argc, char **argv)
         renderWin->draw(sprite);
         // Update the window
         renderWin->display();
+
+        //std::this_thread::sleep_for (std::chrono::seconds(1));
 
         #if DUMP_SINGLE_FRAME
             break;

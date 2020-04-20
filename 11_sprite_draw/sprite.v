@@ -58,6 +58,8 @@ module sprite
     reg [1:0] x_state = BEFORE_SPRITE;
     reg [1:0] y_state = BEFORE_SPRITE;
 
+    wire [8:0] mem_addr;
+
     always @(posedge i_pix_clk) begin
         case(x_state) 
             BEFORE_SPRITE: begin
@@ -83,12 +85,15 @@ module sprite
                 end
             end
             AFTER_SPRITE: begin
-                if(curr_y != i_vert_coord) begin
+                if(i_horz_coord < i_x_coord) begin
                     x_state <= BEFORE_SPRITE;
+                end
+
+                if(curr_y != i_vert_coord) begin
                     curr_y <= i_vert_coord;
 
                     if(y_state == IN_SPRITE) begin
-                        if(y_offset == 8) begin
+                        if(y_offset == 7) begin
                             y_state <= AFTER_SPRITE;
                         end else begin
                             y_offset <= y_offset + 1;
@@ -130,10 +135,14 @@ module sprite
     //     endcase
     // end
 
+    assign mem_addr = {3'b0, y_offset[2:0], x_offset[2:0]};
+
     always @(posedge i_pix_clk) begin
         
+        // mem_addr <= {3'b0, y_offset[2:0], x_offset[2:0]};
+        
         if(x_state == IN_SPRITE && y_state == IN_SPRITE) begin
-            pix_data <= memory[{3'b0, y_offset[2:0], x_offset[2:0]}];
+            pix_data <= memory[mem_addr];
             o_drawing <= 1;
         end
         else begin

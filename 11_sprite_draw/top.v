@@ -60,7 +60,7 @@ module top (
     assign w_clk_40mhz = CLK;
 `endif
 
-    reg [2:0] counter;
+    reg [2:0] counter = 0;
 
     //wire w_clk_sprite;
 
@@ -71,8 +71,8 @@ module top (
     reg signed [15:0] spr_x_coord = 0;
     reg signed [15:0] spr_y_coord = 0;
 
-    reg signed [15:0] spr_x_vel = 5;
-    reg signed [15:0] spr_y_vel = 6;
+    reg signed [15:0] spr_x_vel = 3;
+    reg signed [15:0] spr_y_vel = 2;
 
     /* verilator lint_on UNUSED */
 
@@ -89,20 +89,21 @@ module top (
         , .o_vert_coord(w_vert_coord)
         , .o_in_active_area(w_is_active_area)
         , .o_horz_sync(PIN_9)
-        , .o_vert_sync(PIN_10)
+        , .o_vert_sync(vertical_sync)
     );
 
     wire signed [15:0] next_x_coord, next_y_coord;
+    wire vertical_sync;
+
     assign next_x_coord = spr_x_coord + spr_x_vel;
     assign next_y_coord = spr_y_coord + spr_y_vel;
 
     // Have the sprite bounce around the screen.
-    always @(posedge PIN_10) begin
-        counter <= counter + 1;
+    always @(posedge vertical_sync) begin
 
-        if(next_x_coord >= 800) begin
+        if(next_x_coord >= 200) begin
             spr_x_vel <= -spr_x_vel;
-            spr_x_coord <= 799;
+            spr_x_coord <= 199;
         end
         else if(next_x_coord < 0) begin
             spr_x_vel <= -spr_x_vel;
@@ -112,9 +113,9 @@ module top (
             spr_x_coord <= next_x_coord;
         end
 
-        if(next_y_coord >= 600) begin
+        if(next_y_coord >= 150) begin
             spr_y_vel <= -spr_y_vel;
-            spr_y_coord <= 599;
+            spr_y_coord <= 149;
         end
         else if(next_y_coord < 0) begin
             spr_y_vel <= -spr_y_vel;
@@ -136,13 +137,18 @@ module top (
         // end;
     end
 
-    //assign w_clk_sprite = counter[2];
+    reg sprite_clk;
+
+    always @(posedge w_clk_40mhz) begin
+        counter <= counter + 1;
+        sprite_clk <= counter[1];
+    end
 
     sprite spr1(
-        .i_pix_clk(w_clk_40mhz)
+        .i_pix_clk(sprite_clk)
         // , i_reset
-        , .i_horz_coord(w_horz_coord)
-        , .i_vert_coord(w_vert_coord)
+        , .i_horz_coord({2'b0, w_horz_coord[15:2]})
+        , .i_vert_coord({2'b0, w_vert_coord[15:2]})
 
         , .i_x_coord(spr_x_coord)
         , .i_y_coord(spr_y_coord)
@@ -157,4 +163,5 @@ module top (
     assign {PIN_3, PIN_2, PIN_1} = w_red;
     assign {PIN_6, PIN_5, PIN_4} = w_green;
     assign {PIN_8, PIN_7} = w_blue;
+    assign PIN_10 = vertical_sync;
 endmodule
