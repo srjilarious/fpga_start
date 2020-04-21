@@ -1,5 +1,0 @@
-[requires]
-spdlog/1.1.0@bincrafters/stable
-
-[generators]
-cmake
