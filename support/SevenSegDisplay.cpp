@@ -17,8 +17,8 @@ SevenSegDisplay::SevenSegDisplay(
     mSegments[(int)Segment::C].setPosition(160, 256);
     mSegments[(int)Segment::D].setPosition(48, 384);
     mSegments[(int)Segment::E].setPosition(0, 256);
-    mSegments[(int)Segment::F].setPosition(0, 64);
-    mSegments[(int)Segment::G].setPosition(48, 192);
+    mSegments[(int)Segment::F].setPosition(48, 192);
+    mSegments[(int)Segment::G].setPosition(0, 64);
     mSegments[(int)Segment::DP].setPosition(222, 404);
 }
 
@@ -33,7 +33,7 @@ SevenSegDisplay::setSegment(
         case Segment::B:
         case Segment::C:
         case Segment::E:
-        case Segment::F:
+        case Segment::G:
             mSegments[(int)which].setTexture(on ?
                 mTextures.vertOn : mTextures.vertOff
             );
@@ -42,7 +42,7 @@ SevenSegDisplay::setSegment(
         // Horizontal segments:
         case Segment::A:
         case Segment::D:
-        case Segment::G:
+        case Segment::F:
             mSegments[(int)which].setTexture(on ?
                 mTextures.horzOn : mTextures.horzOff
             );

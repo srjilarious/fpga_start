@@ -132,11 +132,17 @@ macro(fpga_project)
     set(FPGA_SYNTH_TARGET ${FPGA_TARGET}_synth)
   endif()
 
+  set(SYNTH_OPTIONS "")
+  if(${FPGA_SYNTH_BY_DEFAULT})
+    set(SYNTH_OPTIONS SYNTH_BY_DEFAULT)
+  endif()
+  
   ice40_synthesis(
       TARGET ${FPGA_SYNTH_TARGET} 
       TOP_LEVEL_VERILOG ${FPGA_TOP_LEVEL_VERILOG}
       PCF_FILE ${FPGA_PCF_FILE}
       SUPPORT_VERILOG ${FPGA_SUPPORT_VERILOG}
+      ${SYNTH_OPTIONS}
     )
 
 endmacro()

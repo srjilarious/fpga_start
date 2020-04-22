@@ -1,5 +1,7 @@
 /*
-  A class to simulate a serial in parallel out shift register, templated on the size of the register, allowing us to simulate multiple 74HC595 8 bit shift registers chained together.
+  A class to simulate a serial-in parallel-out shift register, templated on 
+  the size of the register, allowing us to simulate multiple 74HC595 8 bit 
+  shift registers chained together.
  */
 
 #pragma once
@@ -7,19 +9,16 @@
 #include <type_traits>
 #include <cstdint>
 #include <climits>
+#include <bitset>
 
-template<typename Storage>
+template<std::size_t NumRegs>
 class SerInParOutShiftReg
 {
 private:
 
-    // We want to make sure we don't try to create a signed
-    // shift register or one with float as the storage.
-    static_assert(
-        std::is_integral<Storage>::value &&
-        std::is_unsigned<Storage>::value);
-
-    Storage mShiftData, mLatched;
+    constexpr static const std::size_t NumBits = NumRegs*8;
+    using ShiftReg = std::bitset<NumBits>;
+    ShiftReg mShiftData, mLatched;
     bool mPrevDataClock, mPrevLatch;
 
 public:
@@ -27,28 +26,30 @@ public:
 
     void update(bool dataIn, bool dataClock, bool latch);
 
-    bool getBitValue(unsigned int which) const;
-    unsigned char getSubByte(unsigned int startBit) const;
-    Storage getLatchedValue() const { return mLatched; }
+    bool getBitValue(std::size_t which) const;
+    unsigned char getSubByte(std::size_t startByte) const;
+    ShiftReg getLatchedValue() const { return mLatched; }
 };
 
-template<typename Storage>
-SerInParOutShiftReg<Storage>::SerInParOutShiftReg()
+template<std::size_t NumRegs>
+SerInParOutShiftReg<NumRegs>::SerInParOutShiftReg()
     : mShiftData{}, mLatched{}, mPrevDataClock(false)
 {
 }
 
-template<typename Storage>
+template<std::size_t NumRegs>
 void
-SerInParOutShiftReg<Storage>::update(
+SerInParOutShiftReg<NumRegs>::update(
         bool dataIn, 
         bool dataClock, 
         bool latch
     )
 {
     if(dataClock && !mPrevDataClock) {
-        mShiftData >>= 1;
-        mShiftData |= ((int)dataIn<<(sizeof(Storage)*CHAR_BIT - 1));
+        mShiftData <<= 1;
+
+        // Set the lowest bit to the incoming value.
+        mShiftData.set(0, dataIn);
     }
     mPrevDataClock = dataClock;
 
@@ -58,16 +59,20 @@ SerInParOutShiftReg<Storage>::update(
     mPrevLatch = latch;
 }
 
-template<typename Storage>
+template<std::size_t NumRegs>
 bool
-SerInParOutShiftReg<Storage>::getBitValue(unsigned int which) const
+SerInParOutShiftReg<NumRegs>::getBitValue(std::size_t which) const
 {
-    return (mLatched & (1 << which)) != 0;
+    return mLatched[which];
 }
 
-template<typename Storage>
+template<std::size_t NumRegs>
 unsigned char 
-SerInParOutShiftReg<Storage>::getSubByte(unsigned int startBit) const
+SerInParOutShiftReg<NumRegs>::getSubByte(std::size_t startByte) const
 {
-    return (mLatched & (0xff << startBit)) >> startBit;
+    unsigned char val = 0;
+    for(std::size_t ii = 0; ii < 8; ii++) {
+        val |= (int)(mLatched[(startByte*8)+ii]) << ii;
+    }
+    return val;
 }
