@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(vga_test VERSION 1.0.0 LANGUAGES CXX)
+project(sprite_test VERSION 1.0.0 LANGUAGES CXX)
 
 # Include our cmake script that defines an fpga_project macro
 include(../cmake/fpga_project.cmake)
