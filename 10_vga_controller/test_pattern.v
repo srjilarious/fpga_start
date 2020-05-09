@@ -25,9 +25,10 @@ module test_pattern
     output [2:0] o_green;
     output [1:0] o_blue;
 
-    assign o_red = i_horz_coord[6:4];
-    assign o_green = i_vert_coord[6:4];
-    assign o_blue = i_horz_coord[7:6] ^ i_vert_coord[6:5];
+
+    assign o_red = (i_in_active_area) ? i_horz_coord[6:4] : 0;
+    assign o_green = (i_in_active_area) ? i_vert_coord[6:4] : 0;
+    assign o_blue = (i_in_active_area) ? i_horz_coord[7:6] ^ i_vert_coord[6:5] : 0;
 
     // always @(posedge i_pix_clk) 
     // begin

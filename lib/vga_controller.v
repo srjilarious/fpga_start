@@ -46,6 +46,7 @@ module vga_controller
     localparam VERT_BACK_PORCH = 23;
 
     localparam HORZ_SYNC_START = HORZ_PIXEL_COUNT + HORZ_FRONT_PORCH;
+    //localparam HORZ_SYNC_START = HORZ_FRONT_PORCH;
     localparam HORZ_SYNC_END = HORZ_SYNC_START + HORZ_SYNC_PULSE;
     localparam HORZ_TOTAL_CYCLES = HORZ_PIXEL_COUNT + HORZ_FRONT_PORCH + HORZ_SYNC_PULSE + HORZ_BACK_PORCH;
 
@@ -56,8 +57,8 @@ module vga_controller
     // reg[1:0] current_horz_state;
     // reg[1:0] current_vert_state;
     
-    reg [15:0] horz_counter;
-    reg [15:0] vert_counter;
+    reg [15:0] horz_counter = 0;
+    reg [15:0] vert_counter = 0;
 
     always @(posedge i_pix_clk) 
     begin
@@ -66,22 +67,20 @@ module vga_controller
         vert_counter <= 0;
       end
       else begin
+          // Handle the counters
+          if(horz_counter == HORZ_TOTAL_CYCLES-1) begin
+              horz_counter <= 0;
 
-        // Handle the counters
-        if(horz_counter >= HORZ_TOTAL_CYCLES-1) begin
-            horz_counter <= 0;
-
-            if(vert_counter < VERT_TOTAL_CYCLES-1) begin
-                vert_counter <= vert_counter + 1;
-            end
-            else begin
-                vert_counter <= 0;
-            end
-        end
-        else begin
-            horz_counter <= horz_counter + 1;
-        end
-        
+              if(vert_counter == VERT_TOTAL_CYCLES-1) begin
+                  vert_counter <= 0;
+              end
+              else begin
+                  vert_counter <= vert_counter + 1;
+              end
+          end
+          else begin
+              horz_counter <= horz_counter + 1;
+          end
        end
     end
 
