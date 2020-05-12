@@ -92,50 +92,50 @@ module top (
         , .o_vert_sync(vertical_sync)
     );
 
-    wire signed [15:0] next_x_coord, next_y_coord;
+    //wire signed [15:0] next_x_coord, next_y_coord;
     wire vertical_sync;
 
-    assign next_x_coord = spr_x_coord + spr_x_vel;
-    assign next_y_coord = spr_y_coord + spr_y_vel;
+    // assign next_x_coord = spr_x_coord + spr_x_vel;
+    // assign next_y_coord = spr_y_coord + spr_y_vel;
 
-    // Have the sprite bounce around the screen.
-    always @(posedge vertical_sync) begin
+    // // Have the sprite bounce around the screen.
+    // always @(posedge vertical_sync) begin
 
-        if(next_x_coord >= 200) begin
-            spr_x_vel <= -spr_x_vel;
-            spr_x_coord <= 199;
-        end
-        else if(next_x_coord < 0) begin
-            spr_x_vel <= -spr_x_vel;
-            spr_x_coord <= 0;
-        end
-        else begin
-            spr_x_coord <= next_x_coord;
-        end
+    //     if(next_x_coord >= 200) begin
+    //         spr_x_vel <= -spr_x_vel;
+    //         spr_x_coord <= 199;
+    //     end
+    //     else if(next_x_coord < 0) begin
+    //         spr_x_vel <= -spr_x_vel;
+    //         spr_x_coord <= 0;
+    //     end
+    //     else begin
+    //         spr_x_coord <= next_x_coord;
+    //     end
 
-        if(next_y_coord >= 150) begin
-            spr_y_vel <= -spr_y_vel;
-            spr_y_coord <= 149;
-        end
-        else if(next_y_coord < 0) begin
-            spr_y_vel <= -spr_y_vel;
-            spr_y_coord <= 0;
-        end
-        else begin
-            spr_y_coord <= next_y_coord;
-        end
+    //     if(next_y_coord >= 150) begin
+    //         spr_y_vel <= -spr_y_vel;
+    //         spr_y_coord <= 149;
+    //     end
+    //     else if(next_y_coord < 0) begin
+    //         spr_y_vel <= -spr_y_vel;
+    //         spr_y_coord <= 0;
+    //     end
+    //     else begin
+    //         spr_y_coord <= next_y_coord;
+    //     end
 
-        // if(spr_x_coord == 800) begin
-        //     spr_x_coord <= 0;
-        //     if(spr_y_coord == 600) begin 
-        //         spr_y_coord <= 0;
-        //     end else begin
-        //         spr_y_coord <= spr_y_coord + 1;
-        //     end
-        // end else begin
-        //     spr_x_coord <= spr_x_coord + 1;
-        // end;
-    end
+    //     // if(spr_x_coord == 800) begin
+    //     //     spr_x_coord <= 0;
+    //     //     if(spr_y_coord == 600) begin 
+    //     //         spr_y_coord <= 0;
+    //     //     end else begin
+    //     //         spr_y_coord <= spr_y_coord + 1;
+    //     //     end
+    //     // end else begin
+    //     //     spr_x_coord <= spr_x_coord + 1;
+    //     // end;
+    // end
 
     reg sprite_clk;
 
@@ -144,16 +144,14 @@ module top (
         sprite_clk <= counter[1];
     end
 
-    sprite spr1(
+    tile_layer tile_1(
         .i_pix_clk(sprite_clk)
         // , i_reset
         , .i_horz_coord({2'b0, w_horz_coord[15:2]})
         , .i_vert_coord({2'b0, w_vert_coord[15:2]})
 
-        , .i_x_coord(spr_x_coord)
-        , .i_y_coord(spr_y_coord)
         , .i_in_active_area(w_is_active_area)
-
+        
         , .o_red(w_red)
         , .o_green(w_green)
         , .o_blue(w_blue)

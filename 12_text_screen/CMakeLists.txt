@@ -9,7 +9,7 @@ set(SIM_SRC_FILES
  )
 
 set(SUPPORTING_VERILOG_FILES 
-    sprite.v
+    tile_layer.v
     ../lib/vga_controller.v
  )
 
@@ -28,10 +28,20 @@ add_custom_command (
     COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_SOURCE_DIR}/ram_contents.mem ${CMAKE_BINARY_DIR}/ram_contents.mem
 )
+add_custom_command (
+    TARGET text_screen_synth PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/text_buffer.mem ${CMAKE_BINARY_DIR}/ram_contents.mem
+)
 
 # The simulation loads the ram contents when run, which we assume is run from within the /bin directory.
 add_custom_command (
     TARGET text_screen PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_SOURCE_DIR}/ram_contents.mem ${CMAKE_BINARY_DIR}/bin/ram_contents.mem
+)
+add_custom_command (
+    TARGET text_screen PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_CURRENT_SOURCE_DIR}/text_buffer.mem ${CMAKE_BINARY_DIR}/bin/ram_contents.mem
 )

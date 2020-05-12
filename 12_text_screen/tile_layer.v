@@ -4,8 +4,8 @@ module tile_layer
         i_pix_clk
         , i_horz_coord
         , i_vert_coord
-        , i_horz_blank
-
+        , i_in_active_area
+        //, i_horz_blank
         , o_red
         , o_green
         , o_blue
@@ -17,8 +17,8 @@ module tile_layer
     reg [7:0] tile_set [0:511];
     reg [7:0] text_buffer [0:511];
     initial begin
-        $readmemh("./ram_contents.mem", memory);
-        // TODO: Add in loading text_buffer file.
+        $readmemh("./text_buffer.mem", text_buffer);
+        $readmemh("./ram_contents.mem", tile_set);
     end
     
     input i_pix_clk;
@@ -39,13 +39,26 @@ module tile_layer
     output [2:0] o_green;
     output [1:0] o_blue;
 
-    reg [15:0] x_offset;
+    //reg [15:0] x_offset;
+
+    /* verilator lint_off UNUSED */
+    wire [12:0] row;
+    wire [12:0] col;
+    wire [2:0] x_offset;
+    wire [2:0] y_offset;
+    reg [7:0] curr_char;
+    /* verilator lint_on UNUSED */
+
+    assign row = i_vert_coord[15:3];
+    assign col = i_horz_coord[15:3];
+    assign x_offset = i_horz_coord[2:0];
+    assign y_offset = i_vert_coord[2:0];
 
     // Current tile line of sprite data
-    reg[7:0] curr_line;
+    reg[7:0] curr_tile_row [0:7];
 
     // Next tile line of sprite data
-    reg[7:0] next_line;
+    reg[7:0] next_tile_row [0:7];
 
     // assign x_offset = i_horz_coord - i_x_coord;
     // assign y_offset = i_vert_coord - i_y_coord;
@@ -54,21 +67,34 @@ module tile_layer
     assign o_green = pix_data[4:2];
     assign o_blue = pix_data[1:0];
 
-    localparam BEFORE_SPRITE = 0;
-    localparam IN_SPRITE = 1;
-    localparam AFTER_SPRITE = 2;
+    // localparam WAITING = 0;
+    // localparam IN_LNE = 1;
+    // localparam AFTER_SPRITE = 2;
 
-    reg [1:0] x_state = BEFORE_SPRITE;
-    reg [1:0] y_state = BEFORE_SPRITE;
+    // reg [1:0] x_state = BEFORE_SPRITE;
+    // reg [1:0] y_state = BEFORE_SPRITE;
 
-    wire [8:0] curr_mem_addr;
+
+    wire [8:0] tile_set_addr;
+    assign tile_set_addr = {curr_char[2:0], y_offset, x_offset};
 
     // Draw the current char line
     always @(posedge i_pix_clk) begin
-        
-        // Draw current pixel from current data
 
-        // load next tile lines next pixel.
+        // Draw current pixel from current data
+        pix_data <= curr_tile_row[7-x_offset];
+
+        if( x_offset == 7) begin
+            // TODO: Just shift in data into row buffer and get rid of curr/next concept.
+            curr_tile_row <= next_tile_row;
+
+            curr_char <= text_buffer[{row[3:0], col[4:0]}];
+        end
+        else begin
+            // Shift in the next byte for the upcoming tile's row.
+            next_tile_row[7-x_offset] <= tile_set[tile_set_addr];
+        end
+        
     end
 
 
@@ -99,21 +125,21 @@ module tile_layer
     //     endcase
     // end
 
-    assign mem_addr = {3'b0, y_offset[2:0], x_offset[2:0]};
+    // assign mem_addr = {3'b0, y_offset[2:0], x_offset[2:0]};
 
-    always @(posedge i_pix_clk) begin
+    // always @(posedge i_pix_clk) begin
         
-        // mem_addr <= {3'b0, y_offset[2:0], x_offset[2:0]};
+    //     // mem_addr <= {3'b0, y_offset[2:0], x_offset[2:0]};
         
-        if(x_state == IN_SPRITE && y_state == IN_SPRITE) begin
-            pix_data <= memory[mem_addr];
-            o_drawing <= 1;
-        end
-        else begin
-            o_drawing <= 0;
-            pix_data <= 0;
-        end
-    end
+    //     if(x_state == IN_SPRITE && y_state == IN_SPRITE) begin
+    //         pix_data <= memory[mem_addr];
+    //         o_drawing <= 1;
+    //     end
+    //     else begin
+    //         o_drawing <= 0;
+    //         pix_data <= 0;
+    //     end
+    // end
 
 endmodule
 

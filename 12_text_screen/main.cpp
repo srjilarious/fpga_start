@@ -38,7 +38,7 @@ const int VertCycles = VertPixelCount + VertFrontPorch + VertSyncPulse + VertBac
 // The number of cycles our module needs to run per frame to generate a frame.
 const int NumSimulationTicksPerFrame = HorzScanLineCycles*VertCycles;
 
-//#define DUMP_SINGLE_FRAME 1
+#define DUMP_SINGLE_FRAME 1
 
 int main(int argc, char **argv) 
 {
