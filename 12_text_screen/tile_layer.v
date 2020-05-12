@@ -55,10 +55,10 @@ module tile_layer
     assign y_offset = i_vert_coord[2:0];
 
     // Current tile line of sprite data
-    reg[7:0] curr_tile_row [0:7];
+    reg [255:0] curr_tile_row;
 
     // Next tile line of sprite data
-    reg[7:0] next_tile_row [0:7];
+    reg [255:0] next_tile_row;
 
     // assign x_offset = i_horz_coord - i_x_coord;
     // assign y_offset = i_vert_coord - i_y_coord;
@@ -78,11 +78,14 @@ module tile_layer
     wire [8:0] tile_set_addr;
     assign tile_set_addr = {curr_char[2:0], y_offset, x_offset};
 
+    wire [2:0] inv_x_offset;
+    assign inv_x_offset = ~x_offset;
+
     // Draw the current char line
     always @(posedge i_pix_clk) begin
 
         // Draw current pixel from current data
-        pix_data <= curr_tile_row[7-x_offset];
+        pix_data <= curr_tile_row[{inv_x_offset, 5'b0} +: 8];
 
         if( x_offset == 7) begin
             // TODO: Just shift in data into row buffer and get rid of curr/next concept.
@@ -92,7 +95,7 @@ module tile_layer
         end
         else begin
             // Shift in the next byte for the upcoming tile's row.
-            next_tile_row[7-x_offset] <= tile_set[tile_set_addr];
+            next_tile_row[{inv_x_offset, 5'b0} +: 8] <= tile_set[tile_set_addr];
         end
         
     end
