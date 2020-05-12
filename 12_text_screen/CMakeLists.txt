@@ -31,7 +31,7 @@ add_custom_command (
 add_custom_command (
     TARGET text_screen_synth PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_SOURCE_DIR}/text_buffer.mem ${CMAKE_BINARY_DIR}/ram_contents.mem
+    ${CMAKE_CURRENT_SOURCE_DIR}/text_buffer.mem ${CMAKE_BINARY_DIR}/text_buffer.mem
 )
 
 # The simulation loads the ram contents when run, which we assume is run from within the /bin directory.
@@ -43,5 +43,5 @@ add_custom_command (
 add_custom_command (
     TARGET text_screen PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_SOURCE_DIR}/text_buffer.mem ${CMAKE_BINARY_DIR}/bin/ram_contents.mem
+    ${CMAKE_CURRENT_SOURCE_DIR}/text_buffer.mem ${CMAKE_BINARY_DIR}/bin/text_buffer.mem
 )
