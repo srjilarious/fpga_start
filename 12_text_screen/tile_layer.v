@@ -47,6 +47,8 @@ module tile_layer
     wire [2:0] x_offset;
     wire [2:0] y_offset;
     reg [7:0] curr_char;
+    reg [7:0] next_char;
+
     /* verilator lint_on UNUSED */
 
     assign row = i_vert_coord[15:3];
@@ -63,9 +65,9 @@ module tile_layer
     // assign x_offset = i_horz_coord - i_x_coord;
     // assign y_offset = i_vert_coord - i_y_coord;
 
-    assign o_red = pix_data[7:5];
-    assign o_green = pix_data[4:2];
-    assign o_blue = pix_data[1:0];
+    assign o_red = i_in_active_area ? pix_data[7:5] : 0;
+    assign o_green = i_in_active_area ? pix_data[4:2] : 0;
+    assign o_blue = i_in_active_area ? pix_data[1:0] : 0;
 
     // localparam WAITING = 0;
     // localparam IN_LNE = 1;
@@ -91,7 +93,12 @@ module tile_layer
             // TODO: Just shift in data into row buffer and get rid of curr/next concept.
             curr_tile_row <= next_tile_row;
 
-            curr_char <= text_buffer[{row[3:0], col[4:0]}];
+            curr_char <= next_char;//text_buffer[{row[3:0], col[4:0]}];
+            next_tile_row[{inv_x_offset, 5'b0} +: 8] <= tile_set[{next_char[2:0], y_offset, x_offset}];
+        end
+        else if(x_offset == 6) begin
+            next_char <= text_buffer[{row[3:0], col[4:0] + 5'b1}];
+            next_tile_row[{inv_x_offset, 5'b0} +: 8] <= tile_set[tile_set_addr];
         end
         else begin
             // Shift in the next byte for the upcoming tile's row.
