@@ -2,6 +2,8 @@
 module tile_layer
     (
         i_pix_clk
+        , i_offset_x
+        , i_offset_y
         , i_horz_coord
         , i_vert_coord
         , i_in_active_area
@@ -49,12 +51,21 @@ module tile_layer
     reg [7:0] curr_char;
     reg [7:0] next_char;
 
+    input [15:0] i_offset_x;
+    input [15:0] i_offset_y;
+
+    wire [15:0] adjust_x;
+    wire [15:0] adjust_y;
+
+    assign adjust_x = i_horz_coord + i_offset_x;
+    assign adjust_y = i_vert_coord + i_offset_y;
+
     /* verilator lint_on UNUSED */
 
-    assign row = i_vert_coord[15:3];
-    assign col = i_horz_coord[15:3];
-    assign x_offset = i_horz_coord[2:0];
-    assign y_offset = i_vert_coord[2:0];
+    assign row = adjust_y[15:3];
+    assign col = adjust_x[15:3];
+    assign x_offset = adjust_x[2:0];
+    assign y_offset = adjust_y[2:0];
 
     // Current tile line of sprite data
     reg [255:0] curr_tile_row;
@@ -62,20 +73,10 @@ module tile_layer
     // Next tile line of sprite data
     reg [255:0] next_tile_row;
 
-    // assign x_offset = i_horz_coord - i_x_coord;
-    // assign y_offset = i_vert_coord - i_y_coord;
 
     assign o_red = i_in_active_area ? pix_data[7:5] : 0;
     assign o_green = i_in_active_area ? pix_data[4:2] : 0;
     assign o_blue = i_in_active_area ? pix_data[1:0] : 0;
-
-    // localparam WAITING = 0;
-    // localparam IN_LNE = 1;
-    // localparam AFTER_SPRITE = 2;
-
-    // reg [1:0] x_state = BEFORE_SPRITE;
-    // reg [1:0] y_state = BEFORE_SPRITE;
-
 
     wire [8:0] tile_set_addr;
     assign tile_set_addr = {curr_char[2:0], y_offset, x_offset};
