@@ -17,7 +17,7 @@ module tile_layer
 
     /* verilator lint_off UNUSED */
     reg [7:0] tile_set [0:511];
-    reg [7:0] text_buffer [0:511];
+    reg [7:0] text_buffer [0:1023];
     initial begin
         $readmemh("./text_buffer.mem", text_buffer);
         $readmemh("./ram_contents.mem", tile_set);
@@ -98,7 +98,7 @@ module tile_layer
             next_tile_row[{inv_x_offset, 5'b0} +: 8] <= tile_set[{next_char[2:0], y_offset, x_offset}];
         end
         else if(x_offset == 6) begin
-            next_char <= text_buffer[{row[3:0], col[4:0] + 5'b1}];
+            next_char <= text_buffer[{row[4:0], col[4:0] + 5'b1}];
             next_tile_row[{inv_x_offset, 5'b0} +: 8] <= tile_set[tile_set_addr];
         end
         else begin
