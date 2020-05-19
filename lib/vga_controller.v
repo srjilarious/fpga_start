@@ -7,6 +7,8 @@ module vga_controller
         , o_horz_coord
         , o_vert_coord
         , o_in_active_area
+        , o_horz_blank
+        , o_vert_blank
         , o_horz_sync
         , o_vert_sync
     );
@@ -17,6 +19,10 @@ module vga_controller
     output [15:0] o_horz_coord;
     output [15:0] o_vert_coord;
     output o_in_active_area;
+    
+    output o_horz_blank;
+    output o_vert_blank;
+
     output o_horz_sync;
     output o_vert_sync;
 
@@ -91,6 +97,9 @@ module vga_controller
     assign o_in_active_area = (horz_counter < HORZ_PIXEL_COUNT) && (vert_counter < VERT_PIXEL_COUNT);
     assign o_horz_sync = ((horz_counter >= HORZ_SYNC_START) && (horz_counter < HORZ_SYNC_END));
     assign o_vert_sync = ((vert_counter >= VERT_SYNC_START) && (vert_counter < VERT_SYNC_END));
+
+    assign o_horz_blank = ((horz_counter >= HORZ_PIXEL_COUNT) && (horz_counter < HORZ_TOTAL_CYCLES));
+    assign o_vert_blank = ((vert_counter >= VERT_PIXEL_COUNT) && (vert_counter < VERT_TOTAL_CYCLES));
 
 endmodule
 

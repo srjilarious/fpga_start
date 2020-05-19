@@ -72,12 +72,17 @@ module top (
     reg signed [15:0] spr_y_coord = 0;
 
     reg signed [15:0] spr_x_vel = 2;
-    reg signed [15:0] spr_y_vel = 1;
+    reg signed [15:0] spr_y_vel = 0;
 
+    wire w_horz_blank;
+    wire w_vert_blank;
+    
     /* verilator lint_on UNUSED */
 
     wire w_is_active_area;
-    
+    wire w_is_horz_sync;
+
+
     wire [2:0] w_red;
     wire [2:0] w_green;
     wire [1:0] w_blue;
@@ -88,7 +93,9 @@ module top (
         , .o_horz_coord(w_horz_coord)
         , .o_vert_coord(w_vert_coord)
         , .o_in_active_area(w_is_active_area)
-        , .o_horz_sync(PIN_9)
+        , .o_horz_blank(w_horz_blank)
+        , .o_vert_blank(w_vert_blank)
+        , .o_horz_sync(w_is_horz_sync)
         , .o_vert_sync(vertical_sync)
     );
 
@@ -103,9 +110,9 @@ module top (
     always @(posedge vertical_sync) begin
         update_counter <= update_counter + 1;
         if(update_counter == 3'b111) begin
-            if(next_x_coord >= 200) begin
+            if(next_x_coord >= 800) begin
                 spr_x_vel <= -spr_x_vel;
-                spr_x_coord <= 199;
+                spr_x_coord <= 799;
             end
             else if(next_x_coord < 0) begin
                 spr_x_vel <= -spr_x_vel;
@@ -127,16 +134,6 @@ module top (
                 spr_y_coord <= next_y_coord;
             end
         end
-        // if(spr_x_coord == 800) begin
-        //     spr_x_coord <= 0;
-        //     if(spr_y_coord == 600) begin 
-        //         spr_y_coord <= 0;
-        //     end else begin
-        //         spr_y_coord <= spr_y_coord + 1;
-        //     end
-        // end else begin
-        //     spr_x_coord <= spr_x_coord + 1;
-        // end;
     end
 
     reg sprite_clk;
@@ -155,6 +152,7 @@ module top (
         , .i_vert_coord({2'b0, w_vert_coord[15:2]})
 
         , .i_in_active_area(w_is_active_area)
+        , .i_horz_blank(w_horz_blank)
         
         , .o_red(w_red)
         , .o_green(w_green)
@@ -165,5 +163,6 @@ module top (
     assign {PIN_3, PIN_2, PIN_1} = w_red;
     assign {PIN_6, PIN_5, PIN_4} = w_green;
     assign {PIN_8, PIN_7} = w_blue;
+    assign PIN_9 = w_is_horz_sync;
     assign PIN_10 = vertical_sync;
 endmodule
