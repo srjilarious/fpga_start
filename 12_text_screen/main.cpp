@@ -50,9 +50,9 @@ int main(int argc, char **argv)
     #endif
 
     auto console = spdlog::stdout_color_mt("simulation");
-    console->info("Welcome to the sprite test!");
+    console->info("Welcome to the tile screen test!");
 
-    sf::String name = "VGA Sprite Test";
+    sf::String name = "VGA Tile Screen Test";
     auto renderWin = std::make_shared<sf::RenderWindow>(
             sf::VideoMode(HorzPixelCount, VertPixelCount), 
             name
@@ -132,7 +132,20 @@ int main(int argc, char **argv)
 
     #if DUMP_SINGLE_FRAME
         tb->closeTrace();
+
+        while (renderWin->isOpen())
+        {
+            // Leave frame displayed, but wait for close event.
+            sf::Event event;
+            while (renderWin->pollEvent(event))
+            {
+                // Close window: exit
+                if (event.type == sf::Event::Closed)
+                    renderWin->close();
+            }
+        }
     #endif
+
 
     delete [] pixelArray;
 

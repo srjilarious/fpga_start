@@ -76,7 +76,7 @@ module top (
 
     wire w_horz_blank;
     wire w_vert_blank;
-    
+
     /* verilator lint_on UNUSED */
 
     wire w_is_active_area;
@@ -99,14 +99,15 @@ module top (
         , .o_vert_sync(vertical_sync)
     );
 
-    wire signed [15:0] next_x_coord, next_y_coord;
     wire vertical_sync;
+
+    wire signed [15:0] next_x_coord, next_y_coord;
 
     assign next_x_coord = spr_x_coord + spr_x_vel;
     assign next_y_coord = spr_y_coord + spr_y_vel;
 
     reg [2:0] update_counter;
-    // Have the sprite bounce around the screen.
+    //Have the sprite bounce around the screen.
     always @(posedge vertical_sync) begin
         update_counter <= update_counter + 1;
         if(update_counter == 3'b111) begin

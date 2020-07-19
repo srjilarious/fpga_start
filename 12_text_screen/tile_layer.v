@@ -48,6 +48,10 @@ module tile_layer
     /* verilator lint_off UNUSED */
     wire [12:0] row;
     wire [12:0] col;
+
+    wire [12:0] row_plus_one;
+    wire [12:0] col_plus_one;
+
     wire [2:0] x_offset;
     wire [2:0] y_offset;
     reg [7:0] curr_char;
@@ -62,6 +66,8 @@ module tile_layer
     assign adjust_x = i_horz_coord + i_offset_x;
     assign adjust_y = i_vert_coord + i_offset_y;
 
+    assign row_plus_one = row + 12'b1;
+    assign col_plus_one = col + 12'b1;
     /* verilator lint_on UNUSED */
 
     assign row = adjust_y[15:3];
@@ -112,18 +118,21 @@ module tile_layer
                 next_tile_row[{inv_x_offset, 3'b0} +: 8] <= tile_set[{next_char[2:0], y_offset, x_offset}];
             end
             else if(x_offset == 6) begin
-                next_char <= text_buffer[{row[4:0], col[4:0] + 5'b1}];
+                next_char <= text_buffer[{row[4:0], col_plus_one[4:0]}];
                 next_tile_row[{inv_x_offset, 3'b0} +: 8] <= tile_set[tile_set_addr];
             end
             else begin
                 // Shift in the next byte for the upcoming tile's row.
                 next_tile_row[{inv_x_offset, 3'b0} +: 8] <= tile_set[tile_set_addr];
             end
+        end
 
-            if(i_horz_blank) begin
-                next_char <= text_buffer[{row[4:0] + 5'b1, col[4:0] + 5'b1}];
-                curr_char <= text_buffer[{row[4:0] + 5'b1, col[4:0] + 5'b0}];
-            end
+        if(load_state == LOAD_DATA_IN_ROW && i_horz_blank) begin
+            next_char <= text_buffer[{row_plus_one[4:0], i_offset_x[7:3] + 5'b1}];
+            curr_char <= text_buffer[{row_plus_one[4:0], i_offset_x[7:3]}];
+        end
+        else if(load_state == HORZ_BLANK_FINISHED) begin
+            next_char <= text_buffer[{row[4:0], i_offset_x[7:3] + 5'b1}];
         end
     end
 
@@ -146,6 +155,7 @@ module tile_layer
         end
         else 
         begin
+            should_load_data <= 0;
             load_state <= load_state + 1;
         end
     end
