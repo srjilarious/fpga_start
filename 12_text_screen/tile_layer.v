@@ -46,6 +46,10 @@ module tile_layer
 
     wire [12:0] row;
     wire [12:0] col;
+
+    wire [12:0] row_plus_one;
+    wire [12:0] col_plus_one;
+
     wire [2:0] x_offset;
     wire [2:0] y_offset;
     reg [7:0] curr_char;
@@ -101,6 +105,7 @@ module tile_layer
             if( x_offset == 7) begin
                 curr_char <= next_char;
             end
+        end
 
             pix_data <= row_buffer[6'b0 +: 8];
             row_buffer <= {row_buffer[8 +: 56], tile_set[tile_set_addr]}; 
