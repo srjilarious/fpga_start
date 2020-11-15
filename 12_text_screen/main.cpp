@@ -68,6 +68,7 @@ int main(int argc, char **argv)
     texture.create(HorzPixelCount, VertPixelCount);
 
     sf::Sprite sprite;
+    bool spaceDown = false;
 
     // Start the game loop
     while (renderWin->isOpen())
@@ -81,14 +82,16 @@ int main(int argc, char **argv)
                 renderWin->close();
         }
 
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-            advanceFrame = true;
+        if(!spaceDown && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+            advanceFrame = !advanceFrame;
+            spaceDown = true;
+        }
+        else if(spaceDown && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+            spaceDown = false;
         }
         
         if(advanceFrame) 
         {
-            advanceFrame = false;
-
             // Handle ticking our module the number of ticks per frame.
             int horzCounter = 0;
             int vertCounter = 0;
