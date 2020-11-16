@@ -105,7 +105,6 @@ module tile_layer
             if( x_offset == 7) begin
                 curr_char <= next_char;
             end
-        end
 
             pix_data <= row_buffer[6'b0 +: 8];
             row_buffer <= {row_buffer[8 +: 56], tile_set[tile_set_addr]}; 
