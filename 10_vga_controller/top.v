@@ -63,6 +63,11 @@ module top (
     wire [15:0] w_horz_coord;
     wire [15:0] w_vert_coord;
     wire w_is_active_area;
+
+    /* verilator lint_off UNUSED */
+    wire w_horz_blank;
+    wire w_vert_blank;
+    /* verilator lint_on UNUSED */
     
     wire [2:0] w_red;
     wire [2:0] w_green;
@@ -74,6 +79,8 @@ module top (
         , .o_horz_coord(w_horz_coord)
         , .o_vert_coord(w_vert_coord)
         , .o_in_active_area(w_is_active_area)
+        , .o_horz_blank(w_horz_blank)
+        , .o_vert_blank(w_vert_blank)
         , .o_horz_sync(PIN_9)
         , .o_vert_sync(PIN_10)
     );
