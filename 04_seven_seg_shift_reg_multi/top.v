@@ -14,7 +14,7 @@ module top (
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
 
-    reg [28:0] counter;
+    reg [31:0] counter;
 
 `ifdef SIMULATION
     localparam START_SEG_1_BIT = 6;
@@ -23,14 +23,16 @@ module top (
     localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
 
     localparam LED_BLINK_BIT = 2;
+    localparam CLOCK_BIT = 0;
 `else
 
-    localparam START_SEG_1_BIT = 24;
+    localparam START_SEG_1_BIT = 22;
     localparam TOP_SEG_1_BIT = START_SEG_1_BIT + 3;
     localparam START_SEG_2_BIT = TOP_SEG_1_BIT + 1;
     localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
 
     localparam LED_BLINK_BIT = 22;
+    localparam CLOCK_BIT = 12;
 `endif
 
     wire [15:0] seg_out;
@@ -38,21 +40,24 @@ module top (
 
     hex_to_7seg segDisplay(
             .i_val(counter[TOP_SEG_1_BIT:START_SEG_1_BIT]), 
-            .o_seg_vals(seg_out[7:0])
+            .o_seg_vals(seg_out[15:8])
         );
     hex_to_7seg segDisplay2(
             .i_val(counter[TOP_SEG_2_BIT:START_SEG_2_BIT]), 
-            .o_seg_vals(seg_out[15:8])
+            .o_seg_vals(seg_out[7:0])
         );
+
+    reg shift_reg_clock = 0; 
+    reg shift_toggle = 0;
 
     // Create a 16 bit (2^4) shift register.
     shift_reg_output #(
         .DATA_WIDTH(4)
         ) shiftReg (
-            .i_clk(CLK),
+            .i_clk(shift_reg_clock),
             .i_reset(1'b0),
             .i_value(seg_out),
-            .i_enable_toggle(counter[START_SEG_1_BIT]),
+            .i_enable_toggle(shift_toggle),
 
             .o_data_val(sh_ds),
             .o_data_clock(sh_clk),
@@ -62,6 +67,8 @@ module top (
     // increment the counter every clock
     always @(posedge CLK) begin
         counter <= counter + 1;
+        shift_reg_clock <= counter[CLOCK_BIT];
+        shift_toggle <= counter[START_SEG_1_BIT];
     end
 
     // light up the LED according to the pattern
