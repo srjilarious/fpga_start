@@ -71,7 +71,7 @@ module top (
     reg signed [15:0] spr_x_coord = 0;
     reg signed [15:0] spr_y_coord = 0;
 
-    reg signed [15:0] spr_x_vel = 2;
+    reg signed [15:0] spr_x_vel = 8;
     reg signed [15:0] spr_y_vel = 0;
 
     wire w_horz_blank;

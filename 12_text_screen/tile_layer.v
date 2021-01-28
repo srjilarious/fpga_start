@@ -111,8 +111,8 @@ module tile_layer
             next_char <= text_buffer[{row[4:0], col[4:0] + 5'b1}];
         end
         else begin
-            curr_char <= 0;//text_buffer[{row[4:0] + 5'b1, 5'b1}];
-            next_char <= 1;//text_buffer[{row[4:0] + 5'b1, 5'b1}];
+            curr_char <= text_buffer[{row[4:0], col[4:0] - 5'b0}];
+            next_char <= text_buffer[{row[4:0], col[4:0] - 5'b0}];
             row_buffer <= {row_buffer[8 +: 56], tile_set[tile_set_addr]}; 
         end
             // else if(x_offset == 6) begin
