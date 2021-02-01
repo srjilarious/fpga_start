@@ -13,7 +13,7 @@
 
 // In simulation we have the states change every 64 ticks, so we have a 
 // relatively low number of overall ticks to see if our circuit is working.
-constexpr float AmountSimulationTicksPerFrame = 5 / 1.0f;
+constexpr float AmountSimulationTicksPerFrame = 1 / 5.0f;
 
 int main(int argc, char** argv)
 {

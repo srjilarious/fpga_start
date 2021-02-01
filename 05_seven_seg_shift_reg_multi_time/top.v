@@ -7,7 +7,6 @@ module top (
     , output PIN_2  // shift register Data clock
     , output PIN_3  // shift register latch to outputs.
 `ifdef SIMULATION
-    //, output [3:0] o_num
     , output [15:0] o_seg_out // Debug output for simulator to veify shifted data is correct.
 `endif
 );
@@ -19,10 +18,11 @@ module top (
 `ifdef SIMULATION
     // When running the simulation, we will lower the number of cycles to make 
     // it easier to read the waveform output.
-    localparam START_SEG_1_BIT = 9;
+    localparam START_SEG_1_BIT = 10;
 
     localparam TIME_TICK_BIT = 5;
-    localparam LED_BLINK_BIT = 2;
+    localparam LED_BLINK_BIT = 10;
+    localparam CLOCK_BIT = 0;
 `else
     // On the real board, our clock is 16MHz, so in order to see the LED pattern
     // we need to consider how many cycle ticks we should have.  In our case
@@ -30,10 +30,12 @@ module top (
     // We'll use that as our algorithm's tick delay.
     localparam START_SEG_1_BIT = 24;
 
-    localparam TIME_TICK_BIT = 6;
+    localparam TIME_TICK_BIT = 17;
 
     // We want the blink pattern to be 4 times per update tick, aka 2 bits less.
     localparam LED_BLINK_BIT = 22;
+
+    localparam CLOCK_BIT = 8;
 `endif
 
     wire [7:0] seg_out;
@@ -61,14 +63,17 @@ module top (
             .o_seg_vals(seg_out)
         );
 
+    reg shift_reg_clock = 0; 
+    reg shift_toggle = 0;
+
     // Create a 16 bit (2^4) shift register.
     shift_reg_output #(
         .DATA_WIDTH(4)
         ) shiftReg(
-            .i_clk(CLK),
+            .i_clk(shift_reg_clock),
             .i_reset(1'b0),
             .i_value(shift_reg_value),
-            .i_enable_toggle(counter[TIME_TICK_BIT]),
+            .i_enable_toggle(shift_toggle),
 
             .o_data_val(sh_ds),
             .o_data_clock(sh_clk),
@@ -84,6 +89,8 @@ module top (
     // we want to send out through the shift register.
     always @(posedge CLK) begin
         counter <= counter + 1;
+        shift_reg_clock <= counter[CLOCK_BIT];
+        shift_toggle <= counter[TIME_TICK_BIT];
 
         if(last_time_bit_val == 0 && counter[TIME_TICK_BIT] == 1'b1) begin
             debug_count <= counter[START_SEG_1_BIT +: 12];

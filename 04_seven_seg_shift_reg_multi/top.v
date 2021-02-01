@@ -17,23 +17,18 @@ module top (
     reg [31:0] counter;
 
 `ifdef SIMULATION
-    localparam START_SEG_1_BIT = 6;
-    localparam TOP_SEG_1_BIT = START_SEG_1_BIT + 3;
-    localparam START_SEG_2_BIT = TOP_SEG_1_BIT + 1;
-    localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
-
-    localparam LED_BLINK_BIT = 2;
+    localparam START_SEG_1_BIT = 10;
+    localparam LED_BLINK_BIT = 10;
     localparam CLOCK_BIT = 0;
 `else
-
     localparam START_SEG_1_BIT = 22;
-    localparam TOP_SEG_1_BIT = START_SEG_1_BIT + 3;
-    localparam START_SEG_2_BIT = TOP_SEG_1_BIT + 1;
-    localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
-
     localparam LED_BLINK_BIT = 22;
     localparam CLOCK_BIT = 12;
 `endif
+
+    localparam TOP_SEG_1_BIT = START_SEG_1_BIT + 3;
+    localparam START_SEG_2_BIT = TOP_SEG_1_BIT + 1;
+    localparam TOP_SEG_2_BIT = START_SEG_2_BIT + 3;
 
     wire [15:0] seg_out;
     wire sh_ds, sh_clk, sh_latch;

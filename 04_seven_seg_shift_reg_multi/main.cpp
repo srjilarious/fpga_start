@@ -39,10 +39,10 @@ int main(int argc, char** argv)
 
     SevenSegDisplay segments[NumSegments] = { SevenSegDisplay(textures), SevenSegDisplay(textures)};
 
-    sf::Vector2f pos = {100.0f, 100.0f};
+    sf::Vector2f pos = {250.0f, 100.0f};
     for(int idx = NumSegments-1; idx >= 0; idx--) {
         segments[idx].position = pos;
-        pos.x += 130.0f;
+        pos.x -= 130.0f;
     }
 
     float simAmount = 0.0f;
