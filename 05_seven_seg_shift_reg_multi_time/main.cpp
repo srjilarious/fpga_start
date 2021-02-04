@@ -13,7 +13,7 @@
 
 // In simulation we have the states change every 64 ticks, so we have a 
 // relatively low number of overall ticks to see if our circuit is working.
-constexpr float AmountSimulationTicksPerFrame = 1 / 5.0f;
+constexpr float AmountSimulationTicksPerFrame = 4.0f;
 
 int main(int argc, char** argv)
 {
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
         // Clear screen
         renderWin->clear();
 
-        auto currSegmentOneHot = shiftReg.getSubByte(1);
+        auto currSegmentOneHot = shiftReg.getSubByte(0);
         decltype(currSegmentOneHot) currSegment = 0;
 
         switch(currSegmentOneHot) {
@@ -116,15 +116,17 @@ int main(int argc, char** argv)
         }
 
         for(int idx = 0; idx < NumSegments; ++idx) {
-            for(int ii = 0; ii < SegmentMax; ++ii) {
-                if(idx == currSegment) {
-                    segments[currSegment].setSegment(static_cast<Segment>(ii), shiftReg.getBitValue(ii));
-                }
-                else {
-                    //segments[idx].setSegment(static_cast<Segment>(ii), false);
+            if(shiftReg.getSubByte(1) != 0) {    
+                for(int ii = 0; ii < SegmentMax; ++ii) {
+                    if(idx == currSegment) {
+                        segments[currSegment].setSegment(static_cast<Segment>(ii), shiftReg.getBitValue(ii+8));
+                    }
+                    else {
+                        //segments[idx].setSegment(static_cast<Segment>(ii), false);
+                    }
                 }
             }
-
+                
             segments[idx].draw(*renderWin.get());
         }
 

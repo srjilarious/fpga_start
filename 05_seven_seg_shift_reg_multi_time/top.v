@@ -6,6 +6,10 @@ module top (
     , output PIN_1  // shift register Data signal
     , output PIN_2  // shift register Data clock
     , output PIN_3  // shift register latch to outputs.
+
+    , output PIN_4  // one hot encoding output
+    , output PIN_5  // one hot encoding output
+    , output PIN_6  // one hot encoding output
 `ifdef SIMULATION
     , output [15:0] o_seg_out // Debug output for simulator to veify shifted data is correct.
 `endif
@@ -13,14 +17,14 @@ module top (
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
 
-    reg [28:0] counter;
+    reg [31:0] counter;
 
 `ifdef SIMULATION
     // When running the simulation, we will lower the number of cycles to make 
     // it easier to read the waveform output.
     localparam START_SEG_1_BIT = 10;
 
-    localparam TIME_TICK_BIT = 5;
+    localparam TIME_TICK_BIT = 6;
     localparam LED_BLINK_BIT = 10;
     localparam CLOCK_BIT = 0;
 `else
@@ -28,20 +32,22 @@ module top (
     // we need to consider how many cycle ticks we should have.  In our case
     // 16*1000*1000 is one second, which is roughly when the 24th bit toggles.
     // We'll use that as our algorithm's tick delay.
-    localparam START_SEG_1_BIT = 24;
+    localparam START_SEG_1_BIT = 20;
 
-    localparam TIME_TICK_BIT = 17;
+    localparam TIME_TICK_BIT = 12;
 
     // We want the blink pattern to be 4 times per update tick, aka 2 bits less.
     localparam LED_BLINK_BIT = 22;
 
-    localparam CLOCK_BIT = 8;
+    localparam CLOCK_BIT = 6;
 `endif
 
     wire [7:0] seg_out;
     wire sh_ds, sh_clk, sh_latch;
 
-    reg [1:0] which_digit = 0;
+    reg [2:0] digit_counter = 0;
+    wire [1:0] which_digit;
+    assign which_digit = digit_counter [2:1];
 
     reg last_time_bit_val =0;
 
@@ -51,7 +57,9 @@ module top (
 
     // The values of the current hex digit we're displaying.
     reg [3:0] curr_digit_values;
+    /* verilator lint_off UNUSED */
     reg [1:0] curr_digit_selected;
+    /* verilator lint_on UNUSED */
     wire [7:0] curr_digit_selected_one_hot;
 
     wire [15:0] shift_reg_value;
@@ -93,26 +101,30 @@ module top (
         shift_toggle <= counter[TIME_TICK_BIT];
 
         if(last_time_bit_val == 0 && counter[TIME_TICK_BIT] == 1'b1) begin
-            debug_count <= counter[START_SEG_1_BIT +: 12];
+            //debug_count <= counter[START_SEG_1_BIT +: 12];
             curr_digit_values <= counter[START_SEG_1_BIT+which_digit*4 +: 4];
             curr_digit_selected <= which_digit;
-            which_digit <= which_digit + 1;
-            if(which_digit == 2) begin
-                which_digit <= 0;
+            digit_counter <= digit_counter + 1;
+            if(digit_counter == 6) begin
+                digit_counter <= 0;
             end
         end
-        else if(last_time_bit_val == 1 && counter[TIME_TICK_BIT] == 1'b0) begin
-        end
+        // else if(last_time_bit_val == 1 && counter[TIME_TICK_BIT] == 1'b0) begin
+        // end
 
         last_time_bit_val <= counter[TIME_TICK_BIT];
     end
 
     // light up the LED according to the pattern
     assign LED = counter[LED_BLINK_BIT];
-    assign shift_reg_value = {curr_digit_selected_one_hot, seg_out};
+    assign shift_reg_value = (digit_counter[0] == 1) ? {seg_out, curr_digit_selected_one_hot} : 16'b0;
     assign PIN_1 = sh_ds;
     assign PIN_2 = sh_clk;
     assign PIN_3 = sh_latch;
+
+    assign PIN_4 = curr_digit_selected_one_hot[0];
+    assign PIN_5 = curr_digit_selected_one_hot[1];
+    assign PIN_6 = curr_digit_selected_one_hot[2];
 
     `ifdef SIMULATION
         assign o_seg_out = shift_reg_value;
