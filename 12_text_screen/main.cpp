@@ -10,6 +10,10 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
+#include <imgui.h>
+#include <imgui_stdlib.h>
+#include <imgui-SFML.h>
+
 #include <memory>
 
 // 640x480 timing constants:
@@ -36,108 +40,188 @@ const int VertBackPorch = 23;
 const int HorzScanLineCycles = HorzPixelCount + HorzFrontPorch + HorzSyncPulse + HorzBackPorch;
 const int VertCycles = VertPixelCount + VertFrontPorch + VertSyncPulse + VertBackPorch;
 
-// The number of cycles our module needs to run per frame to generate a frame.
-const int NumSimulationTicksPerFrame = HorzScanLineCycles*VertCycles;
+// We by default run less than a full frame of ticks so that our debugging gui has time
+// to service events.
+const int NumSimulationTicksPerFrame = 10000;
 
+// The number of cycles our module needs to run per frame to generate a frame.
+const int NumTicksForVGAFrame = HorzScanLineCycles*VertCycles;
 //#define DUMP_SINGLE_FRAME 1
 
-int main(int argc, char **argv) 
+struct SimContext
 {
-    Verilated::commandArgs(argc, argv);
-    auto tb = std::make_unique<TestBench<Vtop>>();
+    SimContext();
+    ~SimContext();
+
+    std::shared_ptr<sf::RenderWindow> renderWin;
+
+    std::unique_ptr<TestBench<Vtop>> tb;
     bool advanceFrame = true;
-
-    #if DUMP_SINGLE_FRAME
-        tb->openTrace("trace.vcd");
-    #endif
-
-    auto console = spdlog::stdout_color_mt("simulation");
-    console->info("Welcome to the tile screen test!");
-
-    sf::String name = "VGA Tile Screen Test";
-    auto renderWin = std::make_shared<sf::RenderWindow>(
-            sf::VideoMode(HorzPixelCount, VertPixelCount), 
-            name
-        );
 
     unsigned char *pixelArray = new unsigned char[HorzPixelCount*VertPixelCount*4];
 
     int frameCounter = 0;
+    int subFrameCount = 0;
 
     sf::Texture texture;
-    texture.create(HorzPixelCount, VertPixelCount);
-
     sf::Sprite sprite;
+
     bool spaceDown = false;
 
-    // Start the game loop
-    while (renderWin->isOpen())
-    {
-        // Process events
-        sf::Event event;
-        while (renderWin->pollEvent(event))
-        {
-            // Close window: exit
-            if (event.type == sf::Event::Closed)
-                renderWin->close();
-        }
+    sf::Clock deltaClock;
+    bool paused = false;
+    bool optionsOpen = true;
 
-        if(!spaceDown && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-            advanceFrame = !advanceFrame;
-            spaceDown = true;
-        }
-        else if(spaceDown && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-            spaceDown = false;
-        }
+    // Handle ticking our module the number of ticks per frame.
+    int horzCounter = 0;
+    int vertCounter = 0;
+    int pixIdx = 0;
+
+    std::shared_ptr<spdlog::logger> console;
+
+    bool update();
+    void render();
+};
+
+
+SimContext::SimContext()
+{
+    tb = std::make_unique<TestBench<Vtop>>();
+
+    console = spdlog::stdout_color_mt("simulation");
+    console->info("Welcome to the tile screen test!");
+
+    sf::String name = "VGA Tile Screen Test";
+    renderWin = std::make_shared<sf::RenderWindow>(
+            sf::VideoMode(HorzPixelCount, VertPixelCount), 
+            name
+        );
+
+    texture.create(HorzPixelCount, VertPixelCount);
+
+    ImGui::SFML::Init(*renderWin);
+}
+
+
+SimContext::~SimContext()
+{
+    delete [] pixelArray;
+}
+
+
+bool 
+SimContext::update()
+{
+    ImGui::SFML::Update(*renderWin, deltaClock.restart());
+
+    if(!spaceDown && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+        advanceFrame = !advanceFrame;
+        spaceDown = true;
+    }
+    else if(spaceDown && !sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+        spaceDown = false;
+    }
         
-        if(advanceFrame) 
+
+    if(advanceFrame && !paused) 
+    {
+        for(int ii = 0; ii < NumSimulationTicksPerFrame; ii++)
         {
-            // Handle ticking our module the number of ticks per frame.
-            int horzCounter = 0;
-            int vertCounter = 0;
-            int pixIdx = 0;
-            for(int ii = 0; ii < NumSimulationTicksPerFrame; ii++)
+            tb->tick();
+
+            if(horzCounter < HorzPixelCount && vertCounter < VertPixelCount) 
             {
-                tb->tick();
+                // Take the output and create a pixel from it.
+                pixelArray[pixIdx] = (tb->m_core->PIN_3 << 7) | (tb->m_core->PIN_2 << 6) | (tb->m_core->PIN_1 << 5);
+                pixelArray[pixIdx+1] = (tb->m_core->PIN_6 << 7) | (tb->m_core->PIN_5 << 6) | (tb->m_core->PIN_4 << 5);
+                pixelArray[pixIdx+2] = (tb->m_core->PIN_8 << 7) | (tb->m_core->PIN_7 << 6);
+                pixelArray[pixIdx+3] = 0xff;
+                pixIdx+=4;
+            }
 
-                if(horzCounter < HorzPixelCount && vertCounter < VertPixelCount) 
-                {
-                    // Take the output and create a pixel from it.
-                    pixelArray[pixIdx] = (tb->m_core->PIN_3 << 7) | (tb->m_core->PIN_2 << 6) | (tb->m_core->PIN_1 << 5);
-                    pixelArray[pixIdx+1] = (tb->m_core->PIN_6 << 7) | (tb->m_core->PIN_5 << 6) | (tb->m_core->PIN_4 << 5);
-                    pixelArray[pixIdx+2] = (tb->m_core->PIN_8 << 7) | (tb->m_core->PIN_7 << 6);
-                    pixelArray[pixIdx+3] = 0xff;
-                    pixIdx+=4;
-                }
-
-                horzCounter++;
-                if(horzCounter >= HorzScanLineCycles) {
-                    horzCounter = 0;
-                    vertCounter++;
-                    if(vertCounter >= VertCycles) {
-                        vertCounter = 0;
-                    }
+            horzCounter++;
+            if(horzCounter >= HorzScanLineCycles) {
+                horzCounter = 0;
+                vertCounter++;
+                if(vertCounter >= VertCycles) {
+                    vertCounter = 0;
                 }
             }
 
-            // Clear screen
-            renderWin->clear(sf::Color(128, 255, 255, 255));
+            subFrameCount++;
+            if(subFrameCount >= NumTicksForVGAFrame) {
+                subFrameCount = 0;
+                horzCounter = 0;
+                vertCounter = 0;
+                pixIdx = 0;
 
-            console->info("frame {}\n", frameCounter);
-            frameCounter++;
+                console->info("frame {}\n", frameCounter);
+                frameCounter++;
 
-            sf::Image img;
-            img.create(HorzPixelCount, VertPixelCount, (sf::Uint8 *)pixelArray);
-            texture.update(img);
+                texture.update((sf::Uint8 *)pixelArray, HorzPixelCount, VertPixelCount, 0, 0);
 
-            sprite.setTexture(texture);
+                sprite.setTexture(texture);
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void 
+SimContext::render()
+{
+    // begin debugger GUI window
+    ImGui::Begin("Simulation Options##ToolWin", &optionsOpen); 
+        
+        if (ImGui::Button("Toggle Pause")) {
+            console->info("!!!! PAUSED !!!");
+            paused = !paused;
+        }
+        
+    ImGui::End();
+
+    // Clear screen
+    renderWin->clear(sf::Color(128, 255, 255, 255));
+    renderWin->draw(sprite);
+        
+    renderWin->resetGLStates();
+    ImGui::SFML::Render();
+
+    // Update the window
+    renderWin->display();
+}
+
+
+int 
+main(int argc, char **argv) 
+{
+    Verilated::commandArgs(argc, argv);
+    
+    #if DUMP_SINGLE_FRAME
+        tb->openTrace("trace.vcd");
+    #endif
+
+    SimContext ctxt;
+    
+    // Start the game loop
+    while (ctxt.renderWin->isOpen())
+    {
+        // Process events
+        sf::Event event;
+        while (ctxt.renderWin->pollEvent(event))
+        {
+            ImGui::SFML::ProcessEvent(event);
+
+            // Close window: exit
+            if (event.type == sf::Event::Closed)
+                ctxt.renderWin->close();
         }
 
-        renderWin->draw(sprite);
-        // Update the window
-        renderWin->display();
-
-        //std::this_thread::sleep_for (std::chrono::seconds(2));
+        ctxt.update();
+        ctxt.render();
 
         #if DUMP_SINGLE_FRAME
             break;
@@ -160,8 +244,6 @@ int main(int argc, char **argv)
         }
     #endif
 
-
-    delete [] pixelArray;
 
     return 0;
 }
