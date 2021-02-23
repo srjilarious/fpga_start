@@ -2,7 +2,7 @@
 # verilog modules needed, and runs them through yosys, nextpnr and finally
 # icepack to create a bitstream for Lattice ice40 based FPGAs.
 #
-# This function assumes that project folders are siblings to a lib folder
+# This function assumes that project folders a siblings to a lib folder
 # where verilog includes live.
 #
 # There are a number of arguments you can pass, such as paths where yosys, 
