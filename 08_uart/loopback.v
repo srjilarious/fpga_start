@@ -21,7 +21,7 @@ module loopback (
 `ifdef SIMULATION
     // When running the simulation, we will lower the number of cycles to make 
     // it easier to read the waveform output.
-    localparam COUNT_BIT = 4;
+    //localparam COUNT_BIT = 4;
     localparam BAUD_MULT = 3;
 
     assign CONFIG_BAUD_TICK = BAUD_MULT;
@@ -30,7 +30,7 @@ module loopback (
     // we need to consider how many cycle ticks we should have.  In our case
     // 16*1000*1000 is one second, which is roughly when the 24th bit toggles.
     // We'll use that as our algorithm's tick delay.
-    localparam COUNT_BIT = 24;
+    //localparam COUNT_BIT = 24;
 
     // 16 MHz / 139 ~= 115200 baud
     //localparam BAUD_MULT = 139;

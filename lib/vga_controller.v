@@ -102,4 +102,3 @@ module vga_controller
     assign o_vert_blank = ((vert_counter >= VERT_PIXEL_COUNT) && (vert_counter < VERT_TOTAL_CYCLES));
 
 endmodule
-

@@ -1,7 +1,7 @@
 [requires]
-sfml/2.5.1@bincrafters/stable
-spdlog/1.1.0@bincrafters/stable
-imgui-sfml/2.1@bincrafters/stable
+sfml/2.5.1@walknsqualk/stable
+spdlog/1.1.0@walknsqualk/stable
+imgui-sfml/2.1@walknsqualk/stable
 
 [options]
 sfml:graphics=True

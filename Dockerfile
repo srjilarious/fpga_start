@@ -1,20 +1,23 @@
-FROM ubuntu:20.10
+FROM ubuntu:21.04
 
 ARG BUILDER_USER_ID
 ARG BUILDER_GROUP_ID
 
 RUN apt -y update
-RUN apt -y install vim cmake git exa fd-find silversearcher-ag \
+RUN DEBIAN_FRONTEND=noninteractive apt -y install \
+                vim cmake git exa fd-find silversearcher-ag \
                 build-essential clang bison flex gawk \
                 make autoconf g++ flex bison
 
 # Otherwise tzdata locks up asking for location.    
-RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
 
-RUN apt -y install libreadline-dev libeigen3-dev libsfml-dev \
-                    tcl-dev libffi-dev git mercurial graphviz   \
+RUN DEBIAN_FRONTEND=noninteractive apt -y install \
+                    libreadline-dev libeigen3-dev libsfml-dev \
+                    tcl-dev libffi-dev git mercurial graphviz  \
                     xdot pkg-config python python3 libftdi-dev \
-                    qt5-default python3-dev libboost-all-dev 
+                    qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools \
+                    python3-dev libboost-all-dev 
 
 RUN mkdir /opt/tools_builds
 RUN git clone https://git.veripool.org/git/verilator /opt/tools_builds/verilator && \
@@ -45,9 +48,6 @@ RUN git clone https://github.com/cliffordwolf/yosys.git /opt/tools_builds/yosys 
     make -j$(nproc) && \
     make install
 
-# Install conan
-RUN apt install -y python3-pip
-RUN pip install conan
 
 RUN addgroup --gid $BUILDER_GROUP_ID builder
 
@@ -76,15 +76,19 @@ RUN DEBIAN_FRONTEND=noninteractive apt install -y \
     libxmuu-dev libxpm-dev libxss-dev libxtst-dev libxv-dev \
     libxvmc-dev libxxf86vm-dev 
 
-RUN DEBIAN_FRONTEND=noninteractive apt install -y xorg openbox
+# RUN DEBIAN_FRONTEND=noninteractive apt install -y xorg openbox
 
 # Install sudo (so conan can install dependencies) and add builder to sudoers within container.
 RUN apt install -y sudo && \
     adduser builder sudo
     
+# Install conan
+RUN apt install -y python3-pip
+RUN pip install conan
+
 # Switch to builder user and fix up conan options, add remote, etc.
 USER builder
 RUN conan profile new default --detect &&\
     conan profile update settings.compiler.libcxx=libstdc++11 default && \
     conan profile update settings.cppstd=17 default && \
-    conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan #&& \
+    conan remote add walknsqualk http://conan.walknsqualk.com #&& \

@@ -132,4 +132,3 @@ module shift_reg_output
     end
 
 endmodule
-

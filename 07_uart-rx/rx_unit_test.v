@@ -22,7 +22,7 @@ module rx_unit_test (
 `ifdef SIMULATION
     // When running the simulation, we will lower the number of cycles to make 
     // it easier to read the waveform output.
-    localparam COUNT_BIT = 4;
+    //localparam COUNT_BIT = 4;
     localparam BAUD_MULT = 3;
 
     assign CONFIG_BAUD_TICK = BAUD_MULT;
@@ -38,9 +38,9 @@ module rx_unit_test (
     localparam BAUD_MULT = 1666;
 `endif
 
-    localparam WAIT_STATE = 0;
-    localparam SEND_BYTE = 1;
-    localparam PAUSE_STATE = 2;
+    // localparam WAIT_STATE = 0;
+    // localparam SEND_BYTE = 1;
+    // localparam PAUSE_STATE = 2;
 
     //reg [1:0] curr_state = 0;
 
