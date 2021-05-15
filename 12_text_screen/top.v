@@ -18,6 +18,12 @@ module top (
     , output PIN_9 // HORZ_SYNC
     , output PIN_10 // VERT_SYNC
     //, output PIN_11 // Reset
+
+`ifdef SIMULATION
+    , output [7:0] o_curr_char
+    , output [12:0] o_row
+    , output [12:0] o_col
+`endif
 );
     // drive USB pull-up resistor to '0' to disable USB
     assign USBPU = 0;
@@ -144,6 +150,16 @@ module top (
         sprite_clk <= counter[1];
     end
 
+`ifdef SIMULATION
+    wire [7:0] w_char;
+    wire [12:0] w_row;
+    wire [12:0] w_col;
+
+    assign o_curr_char = w_char;
+    assign o_row = w_row;
+    assign o_col = w_col;
+`endif
+
     tile_layer tile_1(
         .i_pix_clk(sprite_clk)
         // , i_reset
@@ -158,6 +174,12 @@ module top (
         , .o_red(w_red)
         , .o_green(w_green)
         , .o_blue(w_blue)
+
+    `ifdef SIMULATION
+        , .o_curr_char(w_char)
+        , .o_row(w_row)
+        , .o_col(w_col)
+    `endif
     );
 
 

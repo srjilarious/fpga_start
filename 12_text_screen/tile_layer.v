@@ -12,6 +12,11 @@ module tile_layer
         , o_green
         , o_blue
 
+`ifdef SIMULATION
+        , o_curr_char
+        , o_row
+        , o_col
+`endif
         //, o_drawing
     );
 
@@ -83,6 +88,15 @@ module tile_layer
     wire [2:0] inv_x_offset;
     assign inv_x_offset = ~x_offset;
 
+    `ifdef SIMULATION
+        output [7:0] o_curr_char;
+        output [12:0] o_row;
+        output [12:0] o_col;
+
+        assign o_curr_char = curr_char;
+        assign o_row = row;
+        assign o_col = col;
+    `endif
 
     localparam LOAD_DATA_IN_ROW = 0;
     localparam HORZ_BLANK_STARTED = 1;

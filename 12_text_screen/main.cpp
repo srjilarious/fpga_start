@@ -56,6 +56,8 @@ struct SimContext
     std::shared_ptr<sf::RenderWindow> renderWin;
 
     std::unique_ptr<TestBench<Vtop>> tb;
+    std::vector<uint16_t> frameChars;
+
     bool advanceFrame = true;
 
     unsigned char *pixelArray = new unsigned char[HorzPixelCount*VertPixelCount*4];
@@ -75,6 +77,8 @@ struct SimContext
     // Handle ticking our module the number of ticks per frame.
     int horzCounter = 0;
     int vertCounter = 0;
+
+    short currRow = 0, currCol = 0;
     int pixIdx = 0;
 
     std::shared_ptr<spdlog::logger> console;
@@ -122,6 +126,7 @@ SimContext::update()
         spaceDown = false;
     }
         
+    
 
     if(advanceFrame && !paused) 
     {
@@ -137,6 +142,12 @@ SimContext::update()
                 pixelArray[pixIdx+2] = (tb->m_core->PIN_8 << 7) | (tb->m_core->PIN_7 << 6);
                 pixelArray[pixIdx+3] = 0xff;
                 pixIdx+=4;
+
+                if((horzCounter % 32) == 16 && (vertCounter % 32) == 16) {
+                    // currRow = tb->m_core->o_row;
+                    // currCol = tb->m_core->o_col;
+                    frameChars.push_back((tb->m_core->o_row & 0x1f)<<5 | (tb->m_core->o_col & 0x1f));
+                }
             }
 
             horzCounter++;
@@ -148,6 +159,8 @@ SimContext::update()
                 }
             }
 
+            
+
             subFrameCount++;
             if(subFrameCount >= NumTicksForVGAFrame) {
                 subFrameCount = 0;
@@ -158,6 +171,19 @@ SimContext::update()
                 console->info("frame {}\n", frameCounter);
                 frameCounter++;
 
+                // Dump frameChars:
+                int rc = 0;
+                for(auto val : frameChars) {
+                    printf("%04d ", val);
+                    rc++;
+                    if(rc >= 25) {
+                        printf("\n");
+                        rc = 0;
+                    }
+                }
+                printf("\n");
+                frameChars.clear();
+                
                 texture.update((sf::Uint8 *)pixelArray, HorzPixelCount, VertPixelCount, 0, 0);
 
                 sprite.setTexture(texture);
