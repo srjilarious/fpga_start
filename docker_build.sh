@@ -38,7 +38,7 @@ build_project ()
         -v ${CODE_DIR}:/code \
         -v ${BUILD_DIR}:/build \
         -v ${CONAN_CACHE}:/home/builder/.conan/data \
-        fpga bin/bash --login -c "/code/scripts/build_project.sh $1"
+        fpga bin/bash --login -c "/code/scripts/build_project.sh $1 $2"
     set +x
 }
 
