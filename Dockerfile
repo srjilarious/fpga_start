@@ -20,7 +20,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt -y install \
                     python3-dev libboost-all-dev 
 
 RUN mkdir /opt/tools_builds
-RUN git clone https://github.com/verilator/verilator /opt/tools_builds/verilator && \
+RUN git clone https://git.veripool.org/git/verilator /opt/tools_builds/verilator && \
         cd /opt/tools_builds/verilator && \
         git checkout stable
 
