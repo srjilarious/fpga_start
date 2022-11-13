@@ -1,5 +1,5 @@
 #include "../support/TestBench.h"
-#include "Vtop.h"
+#include "Vblinky_ice40.h"
 
 #include <memory>
 
@@ -10,7 +10,7 @@ const int NumSimulationTicks = 1048576 + 100;
 int main(int argc, char **argv) 
 {
     Verilated::commandArgs(argc, argv);
-    auto tb = std::make_unique<TestBench<Vtop>>();
+    auto tb = std::make_unique<TestBench<Vblinky_ice40>>();
 
     tb->openTrace("trace.vcd");
 
