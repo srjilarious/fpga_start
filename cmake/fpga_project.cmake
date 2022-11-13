@@ -13,6 +13,7 @@ macro(fpga_project_setup)
                           "${multiValueArgsSetup}" ${ARGN})
 
   include(${FPGA_PROECT_SCRIPT_DIR}/yosys_ice40.cmake)
+  include(${FPGA_PROECT_SCRIPT_DIR}/yosys_ecp5.cmake)
 
   #Find verilator
   find_package(verilator HINTS $ENV{VERILATOR_ROOT} ${FPGA_SETUP_VERILATOR_PATH})
@@ -27,14 +28,17 @@ macro(fpga_project_setup)
 
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
-  # Add all of our conan packages to our build.
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo_multi.cmake)
-  else()
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+  list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
+  if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+    message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+    file(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/0.18.1/conan.cmake"
+                  "${CMAKE_BINARY_DIR}/conan.cmake"
+                  TLS_VERIFY ON)
   endif()
 
-  conan_basic_setup()
+  include(${CMAKE_BINARY_DIR}/conan.cmake)
+
 endmacro()
 
 macro(fpga_simulation_project)
@@ -49,6 +53,7 @@ macro(fpga_simulation_project)
   set(multiValueArgsSim
         SIM_SRC_FILES
         SUPPORT_VERILOG
+        LINK_LIBS
     )
 
   cmake_parse_arguments(FPGA "${optionsSim}" "${oneValueArgsSim}"
@@ -62,20 +67,24 @@ macro(fpga_simulation_project)
 
   target_include_directories(${FPGA_TARGET} PRIVATE "../support")
 
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    foreach(_LIB ${CONAN_LIBS_RELEASE})
-        target_link_libraries(${FPGA_TARGET} PRIVATE optimized ${_LIB})
-    endforeach()
-        
-    foreach(_LIB ${CONAN_LIBS_DEBUG})
-        target_link_libraries(${FPGA_TARGET} PRIVATE debug ${_LIB})
-    endforeach()
+  foreach(_LIB ${FPGA_LINK_LIBS})
+    target_link_libraries(${FPGA_TARGET} PRIVATE ${_LIB})
+  endforeach()
 
-    add_definitions(/D_CRT_SECURE_NO_WARNINGS)
-  else()
-    message("Have Conan Libs: '${CONAN_LIBS}'")
-    target_link_libraries(${FPGA_TARGET} PRIVATE ${CONAN_LIBS})
-  endif()
+  # if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+  #   foreach(_LIB ${CONAN_LIBS_RELEASE})
+  #       target_link_libraries(${FPGA_TARGET} PRIVATE optimized ${_LIB})
+  #   endforeach()
+        
+  #   foreach(_LIB ${CONAN_LIBS_DEBUG})
+  #       target_link_libraries(${FPGA_TARGET} PRIVATE debug ${_LIB})
+  #   endforeach()
+
+  #   add_definitions(/D_CRT_SECURE_NO_WARNINGS)
+  # else()
+  #   message("Have Conan Libs: '${CONAN_LIBS}'")
+  #   target_link_libraries(${FPGA_TARGET} PRIVATE ${CONAN_LIBS})
+  # endif()
 
   # Add the Verilated circuit to the target
   verilate (
@@ -91,58 +100,4 @@ macro(fpga_simulation_project)
       ${FPGA_TARGET} PROPERTIES 
       VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
     )
-endmacro()
-
-# Defines a macro that does basic setup for an FPGA project where we have
-# verilator based simulation and ice40 synthesis.
-macro(fpga_project)
-
-  # Define arguments to our function
-  set(options SYNTH_BY_DEFAULT)
-  set(oneValueArgs 
-  SYNTH_TARGET      # target for synthesis, defaults to ${TARGET}_synth
-  TARGET            # The target name for simulation
-        TOP_LEVEL_VERILOG
-        PCF_FILE
-        YOSYS_PATH 
-        NEXTPNR_PATH
-        ICEPACK_PATH
-        VERILATOR_PATH
-    )
-  set(multiValueArgs
-        SIM_SRC_FILES
-        SUPPORT_VERILOG
-    )
-
-  cmake_parse_arguments(FPGA "${options}" "${oneValueArgs}"
-                          "${multiValueArgs}" ${ARGN})
-
-  fpga_project_setup()
-
-  message("Have target '${FPGA_TARGET}' and SRC '${FPGA_SIM_SRC_FILES}'")
-  fpga_simulation_project(
-      TARGET ${FPGA_TARGET}
-      TOP_LEVEL_VERILOG ${FPGA_TOP_LEVEL_VERILOG}
-      VERILATOR_PATH ${FPGA_VERILATOR_PATH}
-      SIM_SRC_FILES ${FPGA_SIM_SRC_FILES}
-      SUPPORT_VERILOG ${FPGA_SUPPORT_VERILOG}
-    )
-
-  if("${FPGA_SYNTH_TARGET}" STREQUAL "") 
-    set(FPGA_SYNTH_TARGET ${FPGA_TARGET}_synth)
-  endif()
-
-  set(SYNTH_OPTIONS "")
-  if(${FPGA_SYNTH_BY_DEFAULT})
-    set(SYNTH_OPTIONS SYNTH_BY_DEFAULT)
-  endif()
-  
-  ice40_synthesis(
-      TARGET ${FPGA_SYNTH_TARGET} 
-      TOP_LEVEL_VERILOG ${FPGA_TOP_LEVEL_VERILOG}
-      PCF_FILE ${FPGA_PCF_FILE}
-      SUPPORT_VERILOG ${FPGA_SUPPORT_VERILOG}
-      ${SYNTH_OPTIONS}
-    )
-
 endmacro()

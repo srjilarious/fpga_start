@@ -1,24 +1,24 @@
 # This function takes a target, top level verilog file and any supporting 
 # verilog modules needed, and runs them through yosys, nextpnr and finally
-# icepack to create a bitstream for Lattice ice40 based FPGAs.
+# ecppack to create a bitstream for Lattice ecp5 based FPGAs.
 #
 # This function assumes that project folders a siblings to a lib folder
 # where verilog includes live.
 #
 # There are a number of arguments you can pass, such as paths where yosys, 
-# nextpnr and icepack can be found
+# nextpnr and ecppack can be found
 #
-function(ice40_synthesis)
+function(ecp5_synthesis)
 
   # Define arguments to our function
   # set(options SYNTH_BY_DEFAULT)
   set(oneValueArgs 
       TARGET 
       TOP_LEVEL_VERILOG
-      PCF_FILE
+      LPF_FILE
       YOSYS_PATH 
       NEXTPNR_PATH
-      ICEPACK_PATH
+      ECPPACK_PATH
     )
   set(multiValueArgs 
       SUPPORT_VERILOG
@@ -31,19 +31,19 @@ function(ice40_synthesis)
   find_program(YOSYS_COMMAND yosys
       HINT ${SYNTH_YOSYS_PATH} ENV YOSYS_PATH
     )
-  find_program(NEXTPNR_COMMAND nextpnr-ice40
+  find_program(NEXTPNRECP5_COMMAND nextpnr-ecp5
       HINT ${SYNTH_NEXTPNR_PATH} ENV NEXTPNR_PATH
     )
-  find_program(ICEPACK_COMMAND icepack
-      HINT ${SYNTH_ICEPACK_PATH} ENV ICEPACK_PATH
+  find_program(ECPPACK_COMMAND ecppack
+      HINT ${SYNTH_ECPPACK_PATH} ENV ECPPACK_COMMAND
     )
 
-  if("${SYNTH_PCF_FILE}" STREQUAL "") 
+  if("${SYNTH_LPF_FILE}" STREQUAL "") 
     # Default to using pins.pcf for pin constraints.
-    set(SYNTH_PCF_FILE pins.pcf)
-    message("-- Using default pins.pcf file for pin constraints.")
+    set(SYNTH_LPF_FILE pins_ecp5.lpf)
+    message("-- Using default pins_ecp5.lpf file for pin constraints.")
   else()
-    message("-- Using '${SYNTH_PCF_FILE}' for pin constraints.")
+    message("-- Using '${SYNTH_LPF_FILE}' for pin constraints.")
   endif()
 
   # Custom target to run yosys synthesis steps
@@ -72,39 +72,39 @@ function(ice40_synthesis)
     COMMAND ${CMAKE_COMMAND} -E echo " "
     COMMAND ${CMAKE_COMMAND} -E echo " "
     COMMAND ${CMAKE_COMMAND} -E echo "#-------------------------------"
-    COMMAND ${CMAKE_COMMAND} -E echo "#-- ICE40 Synthesizing Design --"
+    COMMAND ${CMAKE_COMMAND} -E echo "#-- ECP5 Synthesizing Design  --"
     COMMAND ${CMAKE_COMMAND} -E echo "#-------------------------------"
-    COMMAND ${YOSYS_COMMAND} ARGS -p "${YOSYS_ARGS}; synth_ice40 -top ${TOP_LEVEL_NAME} -json hardware_ice40.json " -q ${CMAKE_CURRENT_SOURCE_DIR}/${SYNTH_TOP_LEVEL_VERILOG}
+    COMMAND ${YOSYS_COMMAND} ARGS -p "${YOSYS_ARGS}; synth_ecp5 -noccu2 -nomux -nodram -top ${TOP_LEVEL_NAME} -json hardware_ecp5.json " -q ${CMAKE_CURRENT_SOURCE_DIR}/${SYNTH_TOP_LEVEL_VERILOG}
     VERBATIM
   )
 
   # Run nextpnr place and route step.
+  # TODO: Make size selection an option between 12k and 85k
   set(NEXTPNR_ARGS 
-    --lp8k 
-    --package cm81 
-    --json hardware_ice40.json 
-    --pcf ${CMAKE_CURRENT_SOURCE_DIR}/${SYNTH_PCF_FILE} 
-    --asc hardware_ice40.asc 
-    -q
-  )
-
+      --12k 
+      --json hardware_ecp5.json 
+      --package CABGA381 
+      --lpf ${CMAKE_CURRENT_SOURCE_DIR}/${SYNTH_LPF_FILE} 
+      --textcfg hardware_ecp5_out.config
+    )
   add_custom_command(
     TARGET ${SYNTH_TARGET}
-    DEPENDS hardware_ice40.json
+    DEPENDS hardware_ecp5.json
     COMMAND ${CMAKE_COMMAND} -E echo " "
-    COMMAND ${CMAKE_COMMAND} -E echo "#-- ICE40 Running Place and Route Step"
-    COMMAND ${NEXTPNR_COMMAND} ARGS ${NEXTPNR_ARGS}
+    COMMAND ${CMAKE_COMMAND} -E echo "#-- ECP5 Running Place and Route Step"
+    COMMAND ${CMAKE_COMMAND} -E echo " - NEXTPNR = '${NEXTPNRECP5_COMMAND}', args='${NEXTPNR_ARGS}'"
+    COMMAND ${NEXTPNRECP5_COMMAND} ARGS ${NEXTPNR_ARGS}
     VERBATIM
   )
 
-  # Pack the results into a bitstream for ice40 FPGAs.
-  set(ICEPACK_ARGS hardware_ice40.asc ${TOP_LEVEL_NAME}.bin)
+  # Pack the results into a bitstream for ecp5 FPGAs.
+  set(ECPPACK_ARGS hardware_ecp5_out.config ${TOP_LEVEL_NAME}.bit)
   add_custom_command(
     TARGET ${SYNTH_TARGET}
-    DEPENDS hardware_ice40.asc
+    DEPENDS hardware_ecp5_out.config
     COMMAND ${CMAKE_COMMAND} -E echo " "
-    COMMAND ${CMAKE_COMMAND} -E echo "#-- ICE40 Packing into Bitstream"
-    COMMAND ${ICEPACK_COMMAND} ARGS ${ICEPACK_ARGS}
+    COMMAND ${CMAKE_COMMAND} -E echo "#-- Packing into Bitstream"
+    COMMAND ${ECPPACK_COMMAND} ARGS ${ECPPACK_ARGS}
     VERBATIM
   )
 endfunction()

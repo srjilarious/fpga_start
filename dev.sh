@@ -4,6 +4,9 @@
 
 SCRIPT_DIR=$(dirname "$0")
 
+# Make sure the build and conan cache directory exist.
+mkdir -p ${SCRIPT_DIR}/build/conan_data
+
 CODE_DIR=$(realpath ${SCRIPT_DIR})
 BUILD_DIR=$(realpath ${SCRIPT_DIR}/build/)
 CONAN_CACHE=$(realpath ${SCRIPT_DIR}/build/conan_data/)

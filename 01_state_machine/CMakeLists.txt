@@ -18,17 +18,41 @@ set(SFML_SIM_SRC_FILES
 # Do some initialization like find verilator, include conan, etc.
 fpga_project_setup()
 
+conan_cmake_configure(
+    REQUIRES 
+      spdlog/1.9.2
+      sfml/2.5.1
+    GENERATORS 
+      cmake_find_package
+    IMPORTS "bin, *.dll -> ./bin"
+    IMPORTS "lib, *.dylib* -> ./bin"
+    OPTIONS sfml:graphics=True
+    OPTIONS sfml:shared=True
+  )
+conan_cmake_autodetect(settings)
+conan_cmake_install(
+    PATH_OR_REFERENCE .
+    BUILD missing
+    REMOTE conancenter
+    SETTINGS ${settings}
+  )
+
+find_package(spdlog)
+find_package(SFML)
+
 fpga_simulation_project(
     TARGET state_machine
     SIM_SRC_FILES ${SIM_SRC_FILES}
     TOP_LEVEL_VERILOG ${MAIN_VERILOG_FILE}
-  )
-
+    LINK_LIBS spdlog::spdlog
+    )
+    
 # Add a second simulation target using SFML.
 fpga_simulation_project(
     TARGET state_machine_sfml
     SIM_SRC_FILES ${SFML_SIM_SRC_FILES}
     TOP_LEVEL_VERILOG ${MAIN_VERILOG_FILE}
+    LINK_LIBS spdlog::spdlog SFML::SFML
   )
 
 ice40_synthesis(

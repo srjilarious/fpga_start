@@ -14,8 +14,6 @@ SRC_DIR=/code/${PROJ}
 echo "# Building FPGA project: '${PROJ}'"
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
-echo "# Running conan for simulator dependencies for FPGA project: '${PROJ}'"
-conan install ${SRC_DIR} --build missing
 echo "# Generating make files for FPGA project: '${PROJ}'"
 cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD} ${SRC_DIR}
 echo "# Building FPGA project: '${PROJ}'"
