@@ -1,5 +1,5 @@
 #include "../support/TestBench.h"
-#include "Vtop.h"
+#include "Vstate_machine.h"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -8,6 +8,15 @@
 
 #include <memory>
 
+struct TB : public TestBench<Vstate_machine>
+{
+    virtual ~TB() = default;
+
+    // We overload the setClock signal method so we can reference different
+    // clock signals for different FPGA boards.
+    void setClock(uint8_t val) { mCore->i_clk = val; }
+};
+
 // In simulation we have the states change every 64 ticks, so we have a 
 // relatively low number of overall ticks to see if our circuit is working.
 constexpr float AmountSimulationTicksPerFrame = 1/60.0f;
@@ -15,7 +24,7 @@ constexpr float AmountSimulationTicksPerFrame = 1/60.0f;
 int main(int argc, char **argv) 
 {
     Verilated::commandArgs(argc, argv);
-    auto tb = std::make_unique<TestBench<Vtop>>();
+    TB tb;
 
     // For this example we won't worry about generating a wave trace.
     //tb->openTrace("trace.vcd");
@@ -44,13 +53,13 @@ int main(int argc, char **argv)
         simAmount += AmountSimulationTicksPerFrame;
         while(simAmount > 1.0f)
         {
-            tb->tick();
+            tb.tick();
             console->info(".");
             simAmount -= 1.0f;
         }
 
 
-        sf::Color clearColor = sf::Color( 64, tb->m_core->LED ? 128 : 64, 64, 255);
+        sf::Color clearColor = sf::Color( 64, tb.mCore->o_led ? 128 : 64, 64, 255);
 
         // Clear screen
         renderWin->clear( clearColor);
@@ -59,5 +68,5 @@ int main(int argc, char **argv)
         renderWin->display();
     }
 
-    tb->closeTrace();
+    tb.closeTrace();
 }

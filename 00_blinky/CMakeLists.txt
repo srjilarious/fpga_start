@@ -4,7 +4,6 @@ project(blinky VERSION 1.0.0 LANGUAGES CXX)
 # Include our cmake script that defines an fpga_project macro
 include(../cmake/fpga_project.cmake)
 
-set(TARGET_NAME blinky)
 set(SIM_SRC_FILES 
     main.cpp
  )
@@ -27,20 +26,27 @@ conan_cmake_install(PATH_OR_REFERENCE .
 find_package(spdlog)
 
 fpga_simulation_project(
-    TARGET ${TARGET_NAME}
+    TARGET blinky_ice40_sim
     TOP_LEVEL_VERILOG blinky_ice40.v
-    SIM_SRC_FILES main.cpp
+    SIM_SRC_FILES main_ice40.cpp
+    LINK_LIBS spdlog::spdlog
+  )
+
+fpga_simulation_project(
+    TARGET blinky_ecp5_sim
+    TOP_LEVEL_VERILOG blinky_ecp5.v
+    SIM_SRC_FILES main_ecp5.cpp
     LINK_LIBS spdlog::spdlog
   )
 
 ice40_synthesis(
-    TARGET ${TARGET_NAME}_ice40
+    TARGET blinky_ice40
     TOP_LEVEL_VERILOG blinky_ice40.v
     PCF_FILE pins.pcf
   )
 
 ecp5_synthesis(
-    TARGET ${TARGET_NAME}_ecp5
+    TARGET blinky_ecp5
     TOP_LEVEL_VERILOG blinky_ecp5.v
     LPF_FILE pins_ecp5.lpf
   )

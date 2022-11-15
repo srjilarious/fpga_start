@@ -1,4 +1,4 @@
-// look in pins.pcf for all the pin names on the TinyFPGA BX board
+// look in pins_ecp5.lpf for all the pin names on the ULX3S board
 module blinky_ecp5 (
     /* verilator lint_off UNUSED */
     input i_clk,
@@ -15,7 +15,8 @@ module blinky_ecp5 (
 
     // increment the blink_counter every clock
     always @(posedge i_clk) begin
-        if(btn[1] == 1'b1) begin
+        // Pressing the second button will pause the counter.
+        if(btn[1] == 1'b0) begin
             num_counter <= num_counter + 1;
         end
 

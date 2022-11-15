@@ -43,7 +43,7 @@ find_package(SFML)
 fpga_simulation_project(
     TARGET state_machine
     SIM_SRC_FILES ${SIM_SRC_FILES}
-    TOP_LEVEL_VERILOG ${MAIN_VERILOG_FILE}
+    TOP_LEVEL_VERILOG state_machine.v
     LINK_LIBS spdlog::spdlog
     )
     
@@ -51,13 +51,20 @@ fpga_simulation_project(
 fpga_simulation_project(
     TARGET state_machine_sfml
     SIM_SRC_FILES ${SFML_SIM_SRC_FILES}
-    TOP_LEVEL_VERILOG ${MAIN_VERILOG_FILE}
+    TOP_LEVEL_VERILOG state_machine.v
     LINK_LIBS spdlog::spdlog SFML::SFML
   )
 
 ice40_synthesis(
-    TARGET state_machine_synth
-    SYNTH_BY_DEFAULT
-    TOP_LEVEL_VERILOG ${MAIN_VERILOG_FILE}
+    TARGET state_machine_ice40
+    TOP_LEVEL_VERILOG top_ice40.v
+    SUPPORT_VERILOG state_machine.v
     PCF_FILE pins.pcf
+  )
+  
+ecp5_synthesis(
+    TARGET state_machine_ecp5
+    TOP_LEVEL_VERILOG top_ecp5.v
+    SUPPORT_VERILOG state_machine.v
+    LPF_FILE pins_ecp5.lpf
   )
