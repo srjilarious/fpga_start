@@ -42,11 +42,11 @@ fpga_simulation_project(
 ice40_synthesis(
     TARGET blinky_ice40
     TOP_LEVEL_VERILOG blinky_ice40.v
-    PCF_FILE pins.pcf
+    PCF_FILE ${CMAKE_SOURCE_DIR}/../support/tiny_fpga_bx_pins.pcf 
   )
 
 ecp5_synthesis(
     TARGET blinky_ecp5
     TOP_LEVEL_VERILOG blinky_ecp5.v
-    LPF_FILE pins_ecp5.lpf
+    LPF_FILE ${CMAKE_SOURCE_DIR}/../support/ulx3s_pins.lpf
   )

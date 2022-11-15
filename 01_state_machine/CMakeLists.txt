@@ -59,12 +59,12 @@ ice40_synthesis(
     TARGET state_machine_ice40
     TOP_LEVEL_VERILOG top_ice40.v
     SUPPORT_VERILOG state_machine.v
-    PCF_FILE pins.pcf
+    PCF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../support/tiny_fpga_bx_pins.pcf
   )
   
 ecp5_synthesis(
     TARGET state_machine_ecp5
     TOP_LEVEL_VERILOG top_ecp5.v
     SUPPORT_VERILOG state_machine.v
-    LPF_FILE pins_ecp5.lpf
+    LPF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../support/ulx3s_pins.lpf
   )

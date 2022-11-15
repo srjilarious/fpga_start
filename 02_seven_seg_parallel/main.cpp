@@ -12,10 +12,19 @@
 
 constexpr float AmountSimulationTicksPerFrame = 1/60.0f;
 
+struct TB : public TestBench<Vtop>
+{
+    virtual ~TB() = default;
+
+    // We overload the setClock signal method so we can reference different
+    // clock signals for different FPGA boards.
+    void setClock(uint8_t val) { mCore->CLK = val; }
+};
+
 int main(int argc, char **argv) 
 {
     Verilated::commandArgs(argc, argv);
-    auto tb = std::make_unique<TestBench<Vtop>>();
+    TB tb;
 
     // Uncomment if you want the waveform to be generated.
     //tb->openTrace("trace.vcd");
@@ -53,7 +62,7 @@ int main(int argc, char **argv)
         simAmount += AmountSimulationTicksPerFrame;
         while(simAmount > 1.0f)
         {
-            tb->tick();
+            tb.tick();
             console->info(".");
 
             simAmount -= 1.0f;
@@ -62,14 +71,14 @@ int main(int argc, char **argv)
         // Clear screen
         renderWin->clear();
 
-        seg.setSegment(Segment::A, tb->m_core->PIN_1);
-        seg.setSegment(Segment::B, tb->m_core->PIN_2);
-        seg.setSegment(Segment::C, tb->m_core->PIN_3);
-        seg.setSegment(Segment::D, tb->m_core->PIN_4);
-        seg.setSegment(Segment::E, tb->m_core->PIN_5);
-        seg.setSegment(Segment::F, tb->m_core->PIN_6);
-        seg.setSegment(Segment::G, tb->m_core->PIN_7);
-        seg.setSegment(Segment::DP, tb->m_core->PIN_8);
+        seg.setSegment(Segment::A, tb.mCore->PIN_1);
+        seg.setSegment(Segment::B, tb.mCore->PIN_2);
+        seg.setSegment(Segment::C, tb.mCore->PIN_3);
+        seg.setSegment(Segment::D, tb.mCore->PIN_4);
+        seg.setSegment(Segment::E, tb.mCore->PIN_5);
+        seg.setSegment(Segment::F, tb.mCore->PIN_6);
+        seg.setSegment(Segment::G, tb.mCore->PIN_7);
+        seg.setSegment(Segment::DP, tb.mCore->PIN_8);
 
         seg.draw(*renderWin.get());
 
@@ -77,5 +86,5 @@ int main(int argc, char **argv)
         renderWin->display();
     }
 
-    tb->closeTrace();
+    tb.closeTrace();
 }

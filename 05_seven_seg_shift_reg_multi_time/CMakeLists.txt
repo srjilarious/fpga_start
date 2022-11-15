@@ -52,7 +52,7 @@ ice40_synthesis(
     SYNTH_BY_DEFAULT
     TOP_LEVEL_VERILOG top.v
     SUPPORT_VERILOG ${SUPPORTING_VERILOG_FILES}
-    PCF_FILE pins.pcf
+    PCF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../support/tiny_fpga_bx_pins.pcf
   )
 
 add_custom_command (

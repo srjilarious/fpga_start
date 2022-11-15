@@ -15,12 +15,21 @@
 // relatively low number of overall ticks to see if our circuit is working.
 constexpr float AmountSimulationTicksPerFrame = 4.0f;
 
+struct TB : public TestBench<Vtop>
+{
+    virtual ~TB() = default;
+
+    // We overload the setClock signal method so we can reference different
+    // clock signals for different FPGA boards.
+    void setClock(uint8_t val) { mCore->CLK = val; }
+};
+
 int main(int argc, char** argv)
 {
     Verilated::commandArgs(argc, argv);
-    auto tb = std::make_unique<TestBench<Vtop>>();
+    TB tb;
 
-    tb->openTrace("trace.vcd");
+    tb.openTrace("trace.vcd");
 
     auto console = spdlog::stdout_color_mt("simulation");
     console->info("Seven Segment Shift Register Simulation!");
@@ -68,19 +77,19 @@ int main(int argc, char** argv)
         simAmount += AmountSimulationTicksPerFrame;
         while (simAmount > 1.0f)
         {
-            tb->tick();
+            tb.tick();
 
             // For every tick, we evaluate the pins in our shift register
             shiftReg.update(
-                tb->m_core->PIN_1,
-                tb->m_core->PIN_2,
-                tb->m_core->PIN_3
+                tb.mCore->PIN_1,
+                tb.mCore->PIN_2,
+                tb.mCore->PIN_3
             );
 
-            if(tb->m_core->PIN_2) {
-                printf("%d ", tb->m_core->PIN_1);
+            if(tb.mCore->PIN_2) {
+                printf("%d ", tb.mCore->PIN_1);
             }
-            if (tb->m_core->PIN_3) {
+            if (tb.mCore->PIN_3) {
                 console->info(
                         //"tick! num={:x}, seg_out={:x}, our_reg={:x}", 
                         "tick! curr seg = {:08b}, seg display = {:02x}", 
@@ -134,5 +143,5 @@ int main(int argc, char** argv)
         renderWin->display();
     }
 
-    tb->closeTrace();
+    tb.closeTrace();
 }

@@ -40,7 +40,7 @@ function(ice40_synthesis)
 
   if("${SYNTH_PCF_FILE}" STREQUAL "") 
     # Default to using pins.pcf for pin constraints.
-    set(SYNTH_PCF_FILE pins.pcf)
+    set(SYNTH_PCF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/pins.pcf)
     message("-- Using default pins.pcf file for pin constraints.")
   else()
     message("-- Using '${SYNTH_PCF_FILE}' for pin constraints.")
@@ -83,7 +83,7 @@ function(ice40_synthesis)
     --lp8k 
     --package cm81 
     --json hardware_ice40.json 
-    --pcf ${CMAKE_CURRENT_SOURCE_DIR}/${SYNTH_PCF_FILE} 
+    --pcf ${SYNTH_PCF_FILE} 
     --asc hardware_ice40.asc 
     -q
   )

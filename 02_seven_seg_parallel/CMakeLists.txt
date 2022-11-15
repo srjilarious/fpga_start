@@ -48,11 +48,10 @@ fpga_simulation_project(
   )
 
 ice40_synthesis(
-    TARGET seven_seg_parallel_synth
-    SYNTH_BY_DEFAULT
+    TARGET seven_seg_parallel_ice40
     TOP_LEVEL_VERILOG top.v
     SUPPORT_VERILOG ${SUPPORTING_VERILOG_FILES}
-    PCF_FILE pins.pcf
+    PCF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../support/tiny_fpga_bx_pins.pcf
   )
 
 add_custom_command (
@@ -60,3 +59,4 @@ add_custom_command (
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/../assets ${CMAKE_BINARY_DIR}/assets
   )
+

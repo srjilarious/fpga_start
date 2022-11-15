@@ -40,7 +40,7 @@ function(ecp5_synthesis)
 
   if("${SYNTH_LPF_FILE}" STREQUAL "") 
     # Default to using pins.pcf for pin constraints.
-    set(SYNTH_LPF_FILE pins_ecp5.lpf)
+    set(SYNTH_LPF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/pins_ecp5.lpf)
     message("-- Using default pins_ecp5.lpf file for pin constraints.")
   else()
     message("-- Using '${SYNTH_LPF_FILE}' for pin constraints.")
@@ -84,7 +84,7 @@ function(ecp5_synthesis)
       --12k 
       --json hardware_ecp5.json 
       --package CABGA381 
-      --lpf ${CMAKE_CURRENT_SOURCE_DIR}/${SYNTH_LPF_FILE} 
+      --lpf ${SYNTH_LPF_FILE} 
       --textcfg hardware_ecp5_out.config
     )
   add_custom_command(
