@@ -11,9 +11,9 @@ CODE_DIR=$(realpath ${SCRIPT_DIR})
 BUILD_DIR=$(realpath ${SCRIPT_DIR}/build/)
 CONAN_CACHE=$(realpath ${SCRIPT_DIR}/build/conan_data/)
 
-echo "CODE_DIR = ${CODE_DIR}"
-echo "BUILD_DIR = ${BUILD_DIR}"
-echo "CONAN_CACHE = ${CONAN_CACHE}"
+# echo "CODE_DIR = ${CODE_DIR}"
+# echo "BUILD_DIR = ${BUILD_DIR}"
+# echo "CONAN_CACHE = ${CONAN_CACHE}"
 
 docker_shell ()
 {
@@ -22,7 +22,6 @@ docker_shell ()
     mkdir -p ${CONAN_CACHE}
     set -x
     docker run -it \
-        --user "builder" \
         -v ${CODE_DIR}:/code \
         -v ${BUILD_DIR}:/build \
         -v ${CONAN_CACHE}:/home/builder/.conan/data \
@@ -37,7 +36,6 @@ build_project ()
     mkdir -p ${CONAN_CACHE}
     set -x
     docker run -it \
-        --user "builder" \
         -v ${CODE_DIR}:/code \
         -v ${BUILD_DIR}:/build \
         -v ${CONAN_CACHE}:/home/builder/.conan/data \
@@ -67,6 +65,10 @@ case $1 in
         ;;
 
     *)
-        echo "Unknown sub-command"
+        echo "Unknown sub-command '$1'"
+        echo "Usage: dev.sh <command>:"
+        echo "    dev.sh setup"
+        echo "    dev.sh build [debug] <project>"
+        echo "    dev.sh shell"
         ;; 
 esac

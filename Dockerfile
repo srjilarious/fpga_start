@@ -28,6 +28,7 @@ RUN apt update && \
         mercurial \
         graphviz \
         xdot \
+        help2man \
         pkg-config \
         python3 \
         python3-dev \
@@ -89,6 +90,8 @@ RUN apt update && \
         libxxf86vm-dev \
         libxaw7-dev \
         libxt-dev \
+        libxcb-cursor0 \
+        libxcb-cursor-dev \
         libxcomposite-dev \
         libxcursor-dev \
         libxdamage-dev \
@@ -167,10 +170,7 @@ RUN useradd --create-home --uid $BUILDER_USER_ID --gid $BUILDER_GROUP_ID -p blah
 RUN adduser builder sudo
     
 # Install conan
-RUN pip install conan
-
-# Switch to builder user and fix up conan options, add remote, etc.
-USER builder
+RUN pip install conan==1.59
 RUN conan profile new default --detect &&\
     conan profile update settings.compiler.libcxx=libstdc++11 default && \
     conan profile update settings.cppstd=17 default && \
