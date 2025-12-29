@@ -141,6 +141,7 @@ RUN git clone --recursive https://github.com/YosysHQ/prjtrellis /opt/tools_build
 # Build nextpnr w/ icestorm(lattice ice40) and trellis(lattice ecp5) fpga support
 RUN git clone https://github.com/YosysHQ/nextpnr /opt/tools_builds/nextpnr && \
     cd /opt/tools_builds/nextpnr && \
+    git checkout nextpnr-0.7 && \
     cmake -DARCH=ice40 -DCMAKE_INSTALL_PREFIX=/usr/local . && \
     make -j$(nproc) && \
     make install
