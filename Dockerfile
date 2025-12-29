@@ -151,7 +151,7 @@ RUN cd /opt/tools_builds/nextpnr && \
     make -j$(nproc) && \
     make install
 
-RUN git clone https://github.com/cliffordwolf/yosys.git /opt/tools_builds/yosys && \
+RUN git clone --recurse-submodules https://github.com/YosysHQ/yosys.git /opt/tools_builds/yosys && \
     cd /opt/tools_builds/yosys && \
     make -j$(nproc) && \
     make install
