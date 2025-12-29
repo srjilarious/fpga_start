@@ -113,13 +113,9 @@ RUN apt update && \
 
 RUN update-ca-certificates
 
-# Update certificate of git.veripool.org
-RUN openssl s_client -showcerts -servername git.veripool.org -connect git.veripool.org:443 </dev/null 2>/dev/null | sed -n -e '/BEGIN\ CERTIFICATE/,/END\ CERTIFICATE/ p' > git-veripool-org.pem
-RUN cat git-veripool-org.pem | tee -a /etc/ssl/certs/ca-certificates.crt
-
 RUN mkdir /opt/tools_builds
 
-RUN git clone https://git.veripool.org/git/verilator /opt/tools_builds/verilator && \
+RUN git clone https://github.com/verilator/verilator /opt/tools_builds/verilator && \
         cd /opt/tools_builds/verilator && \
         git checkout stable
 
