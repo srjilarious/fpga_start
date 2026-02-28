@@ -113,13 +113,9 @@ RUN apt update && \
 
 RUN update-ca-certificates
 
-# Update certificate of git.veripool.org
-RUN openssl s_client -showcerts -servername git.veripool.org -connect git.veripool.org:443 </dev/null 2>/dev/null | sed -n -e '/BEGIN\ CERTIFICATE/,/END\ CERTIFICATE/ p' > git-veripool-org.pem
-RUN cat git-veripool-org.pem | tee -a /etc/ssl/certs/ca-certificates.crt
-
 RUN mkdir /opt/tools_builds
 
-RUN git clone https://git.veripool.org/git/verilator /opt/tools_builds/verilator && \
+RUN git clone https://github.com/verilator/verilator /opt/tools_builds/verilator && \
         cd /opt/tools_builds/verilator && \
         git checkout stable
 
@@ -145,6 +141,7 @@ RUN git clone --recursive https://github.com/YosysHQ/prjtrellis /opt/tools_build
 # Build nextpnr w/ icestorm(lattice ice40) and trellis(lattice ecp5) fpga support
 RUN git clone https://github.com/YosysHQ/nextpnr /opt/tools_builds/nextpnr && \
     cd /opt/tools_builds/nextpnr && \
+    git checkout nextpnr-0.7 && \
     cmake -DARCH=ice40 -DCMAKE_INSTALL_PREFIX=/usr/local . && \
     make -j$(nproc) && \
     make install
@@ -154,7 +151,7 @@ RUN cd /opt/tools_builds/nextpnr && \
     make -j$(nproc) && \
     make install
 
-RUN git clone https://github.com/cliffordwolf/yosys.git /opt/tools_builds/yosys && \
+RUN git clone --recurse-submodules https://github.com/YosysHQ/yosys.git /opt/tools_builds/yosys && \
     cd /opt/tools_builds/yosys && \
     make -j$(nproc) && \
     make install
